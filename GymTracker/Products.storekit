@@ -1,0 +1,40 @@
+{
+  "identifier" : "8F3D2A10-5B7C-4E9F-A1D2-3C4B5E6F7A80",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D",
+      "localizations" : [
+        {
+          "description" : "Séances illimitées, circuits GPX et widgets.",
+          "displayName" : "GymTracker Premium",
+          "locale" : "fr_FR"
+        }
+      ],
+      "productID" : "fr.devshield.gymtracker.premium.lifetime",
+      "referenceName" : "Premium Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "0",
+    "_developerTeamID" : "9SY2FMHDG2",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "fr_FR",
+    "_storefront" : "FRA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

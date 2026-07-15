@@ -109,7 +109,20 @@ private struct LibraryRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ExerciseIllustration(exercise: exercise, size: 52)
+            if let photo = exercise.photoURLs.first {
+                AsyncImage(url: photo) { phase in
+                    if let image = phase.image {
+                        image.resizable().scaledToFill()
+                    } else {
+                        ExerciseIllustration(exercise: exercise, size: 52)
+                    }
+                }
+                .frame(width: 52, height: 52)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            } else {
+                ExerciseIllustration(exercise: exercise, size: 52)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(exercise.name.capitalized)
@@ -136,8 +149,8 @@ struct ExerciseDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                // Illustration (les GIFs du dataset d'origine n'étaient pas libres de droits)
-                ExerciseIllustrationBanner(exercise: exercise)
+                // Photos Free Exercise DB (domaine public), sinon illustration vectorielle
+                ExercisePhotoBanner(exercise: exercise)
 
                 // Badges
                 HStack(spacing: 8) {

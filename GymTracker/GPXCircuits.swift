@@ -39,6 +39,44 @@ enum CircuitLibrary {
     }()
 }
 
+// MARK: - Export GPX d'une course enregistrée
+
+enum GPXExporter {
+    /// Document GPX 1.1 du tracé (points sans horodatage individuel — non stocké)
+    static func document(for run: RunSession) -> String {
+        let iso = ISO8601DateFormatter().string(from: run.date)
+        let points = run.routePoints
+            .map { String(format: "      <trkpt lat=\"%.6f\" lon=\"%.6f\"></trkpt>", $0.lat, $0.lon) }
+            .joined(separator: "\n")
+        return """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <gpx version="1.1" creator="GymTracker" xmlns="http://www.topografix.com/GPX/1/1">
+          <metadata><time>\(iso)</time></metadata>
+          <trk>
+            <name>Course GymTracker — \(String(format: "%.2f", run.distanceKm)) km</name>
+            <trkseg>
+        \(points)
+            </trkseg>
+          </trk>
+        </gpx>
+        """
+    }
+
+    /// Écrit le .gpx dans le dossier temporaire (pour ShareLink) et renvoie son URL
+    static func exportFile(for run: RunSession) -> URL? {
+        guard run.routePoints.count > 1 else { return nil }
+        let stamp = run.date.formatted(.iso8601.year().month().day())
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("GymTracker-course-\(stamp).gpx")
+        do {
+            try document(for: run).write(to: url, atomically: true, encoding: .utf8)
+            return url
+        } catch {
+            return nil
+        }
+    }
+}
+
 // MARK: - Parser GPX léger (XMLParser Foundation)
 
 /// Extrait le premier <name> et tous les points <trkpt>/<rtept> (attributs lat/lon).

@@ -204,7 +204,7 @@ struct ExerciseEditorView: View {
         Form {
             if let catalogEx = ExerciseCatalog.find(id: exercise.catalogID) {
                 Section {
-                    ExerciseIllustrationBanner(exercise: catalogEx)
+                    ExercisePhotoBanner(exercise: catalogEx)
                         .listRowInsets(EdgeInsets())
                 }
             }

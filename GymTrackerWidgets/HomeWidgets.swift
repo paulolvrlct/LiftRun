@@ -1,6 +1,7 @@
 import WidgetKit
 import SwiftUI
 import SwiftData
+import Charts
 
 // MARK: - Widget Streak (jauge de jours consécutifs)
 
@@ -85,6 +86,108 @@ struct StreakWidget: Widget {
         .configurationDisplayName("Streak")
         .description("Tes jours d'activité consécutifs (muscu + course).")
         .supportedFamilies([.systemSmall])
+    }
+}
+
+// MARK: - Widget courbe de volume (Swift Charts)
+
+struct VolumeWeek: Hashable {
+    let start: Date
+    let volume: Double
+}
+
+struct VolumeEntry: TimelineEntry {
+    let date: Date
+    let weeks: [VolumeWeek]
+}
+
+struct VolumeProvider: TimelineProvider {
+    func placeholder(in context: Context) -> VolumeEntry {
+        let cal = Calendar.current
+        let weeks = (0..<6).reversed().map { offset in
+            VolumeWeek(start: cal.date(byAdding: .weekOfYear, value: -offset, to: .now)!,
+                       volume: Double([1800, 2400, 2100, 2900, 2600, 3200][offset]))
+        }
+        return VolumeEntry(date: .now, weeks: weeks)
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (VolumeEntry) -> Void) {
+        completion(loadEntry())
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<VolumeEntry>) -> Void) {
+        let nextMidnight = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
+        completion(Timeline(entries: [loadEntry()], policy: .after(nextMidnight)))
+    }
+
+    /// Volume soulevé (kg) par semaine sur les 6 dernières semaines
+    private func loadEntry() -> VolumeEntry {
+        let calendar = Calendar.current
+        var weeks: [VolumeWeek] = []
+        guard let container = try? SharedStore.makeContainer() else {
+            return VolumeEntry(date: .now, weeks: [])
+        }
+        let context = ModelContext(container)
+        let sessions = (try? context.fetch(FetchDescriptor<WorkoutSession>())) ?? []
+        for offset in (0..<6).reversed() {
+            guard let ref = calendar.date(byAdding: .weekOfYear, value: -offset, to: .now),
+                  let interval = calendar.dateInterval(of: .weekOfYear, for: ref) else { continue }
+            let volume = sessions
+                .filter { interval.contains($0.date) }
+                .reduce(0) { $0 + $1.totalVolume }
+            weeks.append(VolumeWeek(start: interval.start, volume: volume))
+        }
+        return VolumeEntry(date: .now, weeks: weeks)
+    }
+}
+
+struct VolumeChartWidgetView: View {
+    let entry: VolumeEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .foregroundStyle(.indigo)
+                Text("Volume soulevé · 6 semaines")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+            }
+
+            if entry.weeks.allSatisfy({ $0.volume == 0 }) {
+                Text("Termine une séance pour voir ta courbe 💪")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                Chart(entry.weeks, id: \.start) { week in
+                    BarMark(
+                        x: .value("Semaine", week.start, unit: .weekOfYear),
+                        y: .value("kg", week.volume)
+                    )
+                    .foregroundStyle(.indigo)
+                    .cornerRadius(3)
+                }
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .weekOfYear)) { _ in
+                        AxisValueLabel(format: .dateTime.day().month(.narrow), centered: true)
+                            .font(.system(size: 8))
+                    }
+                }
+            }
+        }
+        .containerBackground(.fill.tertiary, for: .widget)
+    }
+}
+
+struct VolumeChartWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "VolumeChartWidget", provider: VolumeProvider()) { entry in
+            VolumeChartWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Volume d'entraînement")
+        .description("Ton volume soulevé par semaine (Swift Charts).")
+        .supportedFamilies([.systemMedium])
     }
 }
 

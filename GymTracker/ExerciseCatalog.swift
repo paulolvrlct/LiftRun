@@ -81,6 +81,27 @@ enum ExerciseCatalog {
         guard let id else { return nil }
         return all.first { $0.id == id }
     }
+
+    /// id catalogue → chemins d'images Free Exercise DB (domaine public).
+    /// Généré par croisement des deux datasets (nom + muscle + matériel).
+    static let mediaMap: [String: [String]] = {
+        guard let url = Bundle.main.url(forResource: "exercise_media", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let map = try? JSONDecoder().decode([String: [String]].self, from: data)
+        else { return [:] }
+        return map
+    }()
+}
+
+// MARK: - Photos libres de droits (Free Exercise DB)
+
+extension CatalogExercise {
+    /// Photos début/fin de mouvement, vide si l'exercice n'est pas mappé
+    var photoURLs: [URL] {
+        (ExerciseCatalog.mediaMap[id] ?? []).compactMap {
+            URL(string: "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/\($0)")
+        }
+    }
 }
 
 // MARK: - Illustration vectorielle d'un exercice
@@ -97,6 +118,32 @@ struct ExerciseIllustration: View {
             .frame(width: size, height: size)
             .background(Color.indigo.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: size * 0.2, style: .continuous))
+    }
+}
+
+/// Bannière photo (Free Exercise DB) avec repli sur l'illustration vectorielle
+struct ExercisePhotoBanner: View {
+    let exercise: CatalogExercise
+
+    var body: some View {
+        if exercise.photoURLs.isEmpty {
+            ExerciseIllustrationBanner(exercise: exercise)
+        } else {
+            HStack(spacing: 8) {
+                ForEach(exercise.photoURLs.prefix(2), id: \.self) { url in
+                    AsyncImage(url: url) { phase in
+                        if let image = phase.image {
+                            image.resizable().scaledToFit()
+                        } else {
+                            Color(.secondarySystemGroupedBackground)
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 170)
+        }
     }
 }
 

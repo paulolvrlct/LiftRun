@@ -45,7 +45,6 @@
 		GT00000000000000000000C8 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				GymTrackerWidgets.entitlements,
 				Info.plist,
 			);
 			target = GT00000000000000000000C3 /* GymTrackerWidgets */;
@@ -61,8 +60,8 @@
 		GT00000000000000000000D9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				GymTracker.entitlements,
 				Info.plist,
+				Products.storekit,
 			);
 			target = GT00000000000000000000A6 /* GymTracker */;
 		};

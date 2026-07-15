@@ -20,11 +20,13 @@
 - Programme A/B/C pré-chargé (instructions en français) + éditeur complet de séances
 - Saisie reps/poids (pas de 1,25 kg), timer de repos automatique, check d'objectif
 - **Bibliothèque de 1 324 exercices** : recherche, filtres par zone (10) et matériel (28), fiches avec exécution pas-à-pas
+- **Photos de mouvement libres de droits** ([Free Exercise DB](https://github.com/yuhonas/free-exercise-db), domaine public) sur 155 exercices dont tout le programme — illustration vectorielle sinon
 
 ### 🏃 Course GPS (style Strava)
 - Carte MapKit avec tracé en temps réel, allure instantanée lissée sur 200 m
 - Fonctionne **écran verrouillé** (background location), pause/reprise
 - **Circuits préenregistrés** : dépose un fichier `.gpx` dans `GymTracker/Circuits/` et le parcours s'affiche en pointillés sur la carte pendant ta course
+- **Export GPX** de chaque course enregistrée (bouton partager sur le détail du parcours)
 
 ### 🏝️ Dynamic Island & écran verrouillé (Live Activities)
 - Timer de repos : décompte animé par le système (économe en batterie)
@@ -33,6 +35,7 @@
 
 ### 📱 Widgets d'écran d'accueil
 - **Streak** : jauge de jours d'activité consécutifs (muscu + course confondues)
+- **Volume d'entraînement** : courbe des kg soulevés par semaine (Swift Charts dans WidgetKit)
 - **Courir** : raccourci qui ouvre l'app directement sur le mode course
 - Base SwiftData partagée app ↔ widgets via App Group
 
@@ -43,6 +46,7 @@
 
 ### 👑 Premium (infrastructure prête)
 - StoreKit 2 intégré : produit lifetime, paywall, restauration d'achats
+- **Config StoreKit locale** (`Products.storekit` branchée au scheme) : l'achat se teste dans Xcode sans App Store Connect
 - Offre gratuite limitée à 3 séances personnalisées ; circuits GPX et widgets en Premium
 
 ## 📸 Captures
@@ -114,10 +118,13 @@ Tout est **local** : SwiftData sur l'appareil, aucun compte, aucun serveur, aucu
 
 - **Code** : © DevShield — tous droits réservés (licence à définir avant réutilisation).
 - **Catalogue d'exercices** : structure textuelle (noms, muscles, instructions) issue de [hasaneyldrm/exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset). Les médias propriétaires (images/GIFs) ont été **retirés** de ce dépôt. ⚠️ Vérifie la licence du dataset source avant tout usage commercial ou soumission App Store.
+- **Photos d'exercices** : [Free Exercise DB](https://github.com/yuhonas/free-exercise-db) — domaine public ([Unlicense](https://unlicense.org)), chargées à la demande.
 
 ## 🗺️ Roadmap
 
-- [ ] Visuels d'exercices libres de droits (API [wger](https://wger.de) ou [Free Exercise DB](https://github.com/yuhonas/free-exercise-db))
-- [ ] Produit In-App dans App Store Connect (le code StoreKit 2 est prêt : `fr.devshield.gymtracker.premium.lifetime`)
-- [ ] Widgets de courbes de progression (WidgetKit + Swift Charts)
-- [ ] Export GPX des courses enregistrées
+- [x] Visuels d'exercices libres de droits — Free Exercise DB (155 exercices mappés, matching nom + muscle + matériel)
+- [x] Widgets de courbes de progression (WidgetKit + Swift Charts) — volume hebdo
+- [x] Export GPX des courses enregistrées
+- [x] Config StoreKit locale pour tester le paywall sans App Store Connect
+- [ ] Produit In-App dans App Store Connect (nécessite l'adhésion Apple Developer payante — le code et l'ID `fr.devshield.gymtracker.premium.lifetime` sont prêts)
+- [ ] Étendre le mapping photos au-delà des 155 exercices (API [wger](https://wger.de) en complément)

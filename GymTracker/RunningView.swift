@@ -310,6 +310,7 @@ private struct RunHistoryRow: View {
 
 struct RunDetailView: View {
     let run: RunSession
+    @State private var gpxURL: URL?
 
     private var coordinates: [CLLocationCoordinate2D] {
         run.routePoints.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
@@ -344,6 +345,16 @@ struct RunDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(run.date.formatted(date: .abbreviated, time: .shortened))
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { gpxURL = GPXExporter.exportFile(for: run) }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if let gpxURL {
+                    ShareLink(item: gpxURL) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                }
+            }
+        }
     }
 
     private func metricTile(_ title: String, _ value: String, _ icon: String) -> some View {
