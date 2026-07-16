@@ -4,7 +4,7 @@
 //  | |_| ||  __/ \ V /  ___) || | | || ||  __/| || (_| |
 //  |____/  \___|  \_/  |____/ |_| |_||_| \___||_| \__,_|
 //
-//  GymTracker · une app DevShield
+//  LiftRun · une app DevShield
 
 import SwiftUI
 import SwiftData

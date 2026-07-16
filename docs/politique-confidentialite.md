@@ -1,10 +1,10 @@
-# Politique de confidentialité — GymTracker
+# Politique de confidentialité : LiftRun
 
 *Dernière mise à jour : 15 juillet 2026*
 
 ## En résumé
 
-**GymTracker ne collecte aucune donnée.** Tout ce que tu enregistres dans l'application — séances de musculation, courses, tracés GPS, profil (prénom, taille, poids, sexe) — est stocké **uniquement sur ton appareil**. Aucun compte n'est requis, aucun serveur ne reçoit tes données, aucun traceur publicitaire n'est intégré.
+**LiftRun ne collecte aucune donnée.** Tout ce que tu enregistres dans l'application — séances de musculation, courses, tracés GPS, profil (prénom, taille, poids, sexe) — est stocké **uniquement sur ton appareil**. Aucun compte n'est requis, aucun serveur ne reçoit tes données, aucun traceur publicitaire n'est intégré.
 
 ## Données traitées localement
 
@@ -28,7 +28,7 @@ L'application fonctionne hors ligne. Les seules connexions sortantes sont :
 
 ## Achats intégrés
 
-L'éventuel achat « GymTracker Premium » est traité intégralement par Apple (App Store). L'application ne voit ni ne stocke aucune information de paiement.
+L'éventuel achat « LiftRun Premium » est traité intégralement par Apple (App Store). L'application ne voit ni ne stocke aucune information de paiement.
 
 ## Notifications
 

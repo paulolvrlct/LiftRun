@@ -1,4 +1,4 @@
-# 🏋️ GymTracker
+# 🏃 LiftRun
 
 L'app iOS qui centralise toute ton activité sportive : musculation, course GPS, Live Activities dans la Dynamic Island et widgets d'écran d'accueil. 100 % locale, sans compte, sans pub.
 

@@ -359,6 +359,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GymTracker/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LiftRun;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GymTracker suit ta position pour enregistrer ton allure et ton tracé pendant tes courses.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -392,6 +393,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GymTracker/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LiftRun;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GymTracker suit ta position pour enregistrer ton allure et ton tracé pendant tes courses.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -423,7 +425,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GymTrackerWidgets/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = GymTrackerWidgets;
+				INFOPLIST_KEY_CFBundleDisplayName = LiftRun;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -447,7 +449,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GymTrackerWidgets/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = GymTrackerWidgets;
+				INFOPLIST_KEY_CFBundleDisplayName = LiftRun;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

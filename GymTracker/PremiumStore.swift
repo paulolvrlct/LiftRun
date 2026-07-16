@@ -94,7 +94,7 @@ struct PaywallView: View {
                     .foregroundStyle(.yellow)
                     .padding(.top, 24)
 
-                Text("GymTracker Premium")
+                Text("LiftRun Premium")
                     .font(.title2.bold())
 
                 VStack(alignment: .leading, spacing: 14) {

@@ -1,6 +1,6 @@
-# 🏋️ GymTracker
+# 🏃 LiftRun
 
-**L'app iOS qui centralise toute ton activité sportive** — musculation, course GPS, Live Activities dans la Dynamic Island, widgets d'écran d'accueil. 100 % frameworks Apple, zéro dépendance externe, données 100 % locales.
+**LiftRun : l'app iOS qui centralise toute ton activité sportive** — musculation, course GPS, Live Activities dans la Dynamic Island, widgets d'écran d'accueil. 100 % frameworks Apple, zéro dépendance externe, données 100 % locales.
 
 ![iOS](https://img.shields.io/badge/iOS-17.0%2B-black?logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5-F05138?logo=swift&logoColor=white)

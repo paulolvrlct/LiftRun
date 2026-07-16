@@ -39,7 +39,7 @@ struct CreditsView: View {
             }
 
             Section("Confidentialité") {
-                Text("GymTracker ne collecte aucune donnée : entraînements, courses et profil restent sur cet appareil.")
+                Text("LiftRun ne collecte aucune donnée : entraînements, courses et profil restent sur cet appareil.")
                     .font(.footnote)
             }
         }
@@ -71,7 +71,7 @@ struct OnboardingView: View {
                                                startPoint: .topLeading, endPoint: .bottomTrailing),
                                 in: RoundedRectangle(cornerRadius: 24, style: .continuous)
                             )
-                        Text("Bienvenue dans GymTracker")
+                        Text("Bienvenue dans LiftRun")
                             .font(.title2.bold())
                         Text("Ces infos personnalisent ton accueil et tes stats. Elles restent 100 % sur ton appareil.")
                             .font(.subheadline)

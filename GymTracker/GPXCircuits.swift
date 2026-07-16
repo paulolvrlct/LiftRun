@@ -50,10 +50,10 @@ enum GPXExporter {
             .joined(separator: "\n")
         return """
         <?xml version="1.0" encoding="UTF-8"?>
-        <gpx version="1.1" creator="GymTracker" xmlns="http://www.topografix.com/GPX/1/1">
+        <gpx version="1.1" creator="LiftRun" xmlns="http://www.topografix.com/GPX/1/1">
           <metadata><time>\(iso)</time></metadata>
           <trk>
-            <name>Course GymTracker · \(String(format: "%.2f", run.distanceKm)) km</name>
+            <name>Course LiftRun · \(String(format: "%.2f", run.distanceKm)) km</name>
             <trkseg>
         \(points)
             </trkseg>
@@ -67,7 +67,7 @@ enum GPXExporter {
         guard run.routePoints.count > 1 else { return nil }
         let stamp = run.date.formatted(.iso8601.year().month().day())
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("GymTracker-course-\(stamp).gpx")
+            .appendingPathComponent("LiftRun-course-\(stamp).gpx")
         do {
             try document(for: run).write(to: url, atomically: true, encoding: .utf8)
             return url
