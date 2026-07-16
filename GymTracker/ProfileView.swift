@@ -9,6 +9,45 @@ enum UserSex: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+// MARK: - Licences et crédits (attributions requises)
+
+struct CreditsView: View {
+    var body: some View {
+        List {
+            Section("Catalogue d'exercices") {
+                Text("Structure et instructions issues du dataset « exercises-dataset » © 2026 Hasan Emir Yıldırım — licence MIT. Les médias d'origine (© Gym visual) ne sont pas utilisés dans cette app.")
+                    .font(.footnote)
+                Link("github.com/hasaneyldrm/exercises-dataset",
+                     destination: URL(string: "https://github.com/hasaneyldrm/exercises-dataset")!)
+                    .font(.footnote)
+            }
+
+            Section("Photos d'exercices") {
+                Text("Free Exercise DB — domaine public (Unlicense).")
+                    .font(.footnote)
+                Link("github.com/yuhonas/free-exercise-db",
+                     destination: URL(string: "https://github.com/yuhonas/free-exercise-db")!)
+                    .font(.footnote)
+            }
+
+            Section("Circuits de course") {
+                Text("Tracés générés à partir des données © les contributeurs OpenStreetMap, disponibles sous licence ODbL.")
+                    .font(.footnote)
+                Link("openstreetmap.org/copyright",
+                     destination: URL(string: "https://www.openstreetmap.org/copyright")!)
+                    .font(.footnote)
+            }
+
+            Section("Confidentialité") {
+                Text("GymTracker ne collecte aucune donnée : entraînements, courses et profil restent sur cet appareil.")
+                    .font(.footnote)
+            }
+        }
+        .navigationTitle("Licences et crédits")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 // MARK: - Onboarding au premier lancement
 
 struct OnboardingView: View {
@@ -120,6 +159,12 @@ struct ProfileView: View {
                     Text("Ces informations restent sur ton appareil — aucune n'est envoyée nulle part.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                }
+
+                Section("À propos") {
+                    LabeledContent("Version",
+                                   value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
+                    NavigationLink("Licences et crédits") { CreditsView() }
                 }
             }
             .navigationTitle("Mon profil")

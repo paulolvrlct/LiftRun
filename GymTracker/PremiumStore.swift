@@ -23,9 +23,9 @@ final class PremiumStore: ObservableObject {
     @Published private(set) var product: Product?
     @Published private(set) var hasPurchased = false
 
-    /// `true` = tout déverrouillé (usage perso) · `false` = paywall actif.
-    /// Doit rester à `false` pour toute release App Store.
-    private let debugUnlockAll = true
+    /// `true` = tout déverrouillé (debug) · `false` = paywall actif.
+    /// ⚠️ Doit impérativement rester à `false` pour toute release App Store.
+    private let debugUnlockAll = false
 
     var isPremium: Bool { hasPurchased || debugUnlockAll }
 
@@ -102,8 +102,8 @@ struct PaywallView: View {
                             "L'offre gratuite est limitée à \(PremiumStore.FreeTier.maxTemplates) séances.")
                     feature("map.fill", "Circuits de course",
                             "Parcours préenregistrés affichés sur la carte pendant ta course.")
-                    feature("square.grid.2x2.fill", "Widgets d'écran d'accueil",
-                            "Streak et raccourci course directement sur ton écran d'accueil.")
+                    feature("heart.fill", "Achat unique, pas d'abonnement",
+                            "Tu débloques tout, pour toujours — et tu soutiens le développement.")
                 }
                 .padding(20)
                 .background(Color(.secondarySystemGroupedBackground),
