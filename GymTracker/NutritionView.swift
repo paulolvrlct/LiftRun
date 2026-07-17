@@ -271,7 +271,7 @@ struct NutritionView: View {
                         Text(entry.name)
                             .font(.footnote)
                             .lineLimit(1)
-                        Text("\(Int(entry.grams)) g")
+                        Text("\(Int(entry.grams)) \(entry.category == FoodCategory.drinks.rawValue ? "mL" : "g")")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
@@ -444,6 +444,8 @@ struct FoodQuantityView: View {
     @State private var mealRaw = MealKind.lunch.rawValue
 
     private var kcal: Int { Int(food.k * grams / 100) }
+    /// Boissons affichées en volume (1 mL ≈ 1 g pour les liquides)
+    private var unit: String { food.category == .drinks ? "mL" : "g" }
 
     var body: some View {
         NavigationStack {
@@ -456,7 +458,7 @@ struct FoodQuantityView: View {
                     }
                 }
                 Section("Quantité") {
-                    Stepper("\(Int(grams)) g", value: $grams, in: 5...1500, step: 5)
+                    Stepper("\(Int(grams)) \(unit)", value: $grams, in: 5...1500, step: 5)
                     Slider(value: $grams, in: 5...500, step: 5)
                     LabeledContent("Apport", value: "\(kcal) kcal")
                 }
