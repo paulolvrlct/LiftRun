@@ -1,5 +1,6 @@
 import Foundation
 import HealthKit
+import SwiftData
 
 // MARK: - Intégration Apple Santé (écriture uniquement)
 // Séances et courses enregistrées comme entraînements, journal alimentaire
@@ -79,6 +80,38 @@ final class HealthKitManager {
         } catch {
             // Santé indisponible ou refusée : l'app reste pleinement fonctionnelle
         }
+    }
+
+    // MARK: Rattrapage de l'historique
+
+    /// Exporte une seule fois l'historique existant (séances + courses) vers
+    /// Santé — couvre les entraînements réalisés avant l'intégration HealthKit.
+    func backfillIfNeeded(context: ModelContext) async {
+        guard isAvailable else { return }
+        let flag = "healthBackfillDone"
+        guard !UserDefaults.standard.bool(forKey: flag) else { return }
+        await ensureAuthorization()
+
+        let weight = UserDefaults.standard.double(forKey: "profileWeightKg")
+        let kg = weight > 0 ? weight : 70
+
+        let sessions = (try? context.fetch(FetchDescriptor<WorkoutSession>())) ?? []
+        for session in sessions where session.durationSeconds > 0 {
+            await saveStrengthWorkout(
+                start: session.date,
+                durationSeconds: session.durationSeconds,
+                kcal: CalorieEstimator.workoutKcal(durationSeconds: session.durationSeconds,
+                                                   weightKg: kg))
+        }
+        let runs = (try? context.fetch(FetchDescriptor<RunSession>())) ?? []
+        for run in runs where run.durationSeconds > 0 {
+            await saveRun(
+                start: run.date.addingTimeInterval(-TimeInterval(run.durationSeconds)),
+                durationSeconds: run.durationSeconds,
+                kcal: CalorieEstimator.runKcal(distanceKm: run.distanceKm, weightKg: kg),
+                distanceMeters: run.distanceMeters)
+        }
+        UserDefaults.standard.set(true, forKey: flag)
     }
 
     // MARK: Nutrition

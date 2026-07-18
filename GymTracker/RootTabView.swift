@@ -38,6 +38,8 @@ struct RootTabView: View {
         .onAppear {
             NotificationManager.shared.requestAuthorization()
             NutritionPlanner.publishForWidget(context: context)
+            // Exporte une fois l'historique pré-HealthKit vers Apple Santé
+            Task { await HealthKitManager.shared.backfillIfNeeded(context: context) }
         }
         // Lien profond depuis le widget raccourci (gymtracker://run)
         .onOpenURL { url in
