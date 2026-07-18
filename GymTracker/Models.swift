@@ -121,6 +121,9 @@ final class FoodEntry {
     var fatPer100: Double
     var meal: String
     var category: Int = 8      // FoodCategory (défaut : divers, pour la migration)
+    /// UUID des échantillons Apple Santé liés (séparés par des virgules),
+    /// pour supprimer les données Santé avec l'entrée
+    var healthIDs: String = ""
 
     init(date: Date = .now, name: String, grams: Double,
          kcalPer100: Double, proteinPer100: Double,

@@ -283,6 +283,11 @@ struct NutritionView: View {
                 }
                 .contextMenu {
                     Button(role: .destructive) {
+                        // retire aussi les échantillons Apple Santé liés
+                        let ids = entry.healthIDs.split(separator: ",").map(String.init)
+                        if !ids.isEmpty {
+                            Task { await HealthKitManager.shared.deleteFoodSamples(ids: ids) }
+                        }
                         context.delete(entry)
                         try? context.save()
                         NutritionPlanner.publishForWidget(context: context)
@@ -509,6 +514,19 @@ struct FoodQuantityView: View {
         context.insert(entry)
         try? context.save()
         NutritionPlanner.publishForWidget(context: context)
+
+        // Écrit aussi dans Apple Santé et mémorise les UUID pour la suppression
+        Task {
+            let ids = await HealthKitManager.shared.saveFood(
+                kcal: entry.kcal, protein: entry.protein,
+                carbs: entry.carbs, fat: entry.fat,
+                date: entry.date, name: entry.name)
+            if !ids.isEmpty {
+                entry.healthIDs = ids.joined(separator: ",")
+                try? context.save()
+            }
+        }
+
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         dismiss()
         onAdded()

@@ -48,6 +48,11 @@
 - Course : courbes d'**allure**, de **distance** et de **durée** par sortie, records et total couru
 - Calendrier mensuel unifié : pastilles séances (indigo) et courses (vert)
 
+### ❤️ Apple Santé
+- Chaque séance et chaque course enregistrée comme **entraînement dans Santé** (durée, calories, distance)
+- Le journal alimentaire alimente les **données nutrition** de Santé (énergie, protéines, glucides, lipides), avec suppression synchronisée
+- Écriture uniquement, sur autorisation explicite — la lecture (courses Apple Watch) viendra avec l'app watchOS
+
 ### 👤 Profil & onboarding
 - Au premier lancement, l'app demande prénom, sexe, taille et poids (modifiables via l'icône profil de l'accueil, IMC calculé)
 - L'accueil salue l'utilisateur par son prénom — tout reste en local, aucun compte

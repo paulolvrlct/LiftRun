@@ -27,6 +27,10 @@ L'application fonctionne hors ligne. Les seules connexions sortantes sont :
 - le **fond de carte Apple Plans** (mode course), régi par la [politique de confidentialité d'Apple](https://www.apple.com/legal/privacy/) ;
 - le chargement à la demande des **photos d'exercices** depuis le dépôt public Free Exercise DB (GitHub). Aucune donnée personnelle n'accompagne ces requêtes.
 
+## Apple Santé
+
+Avec ton autorisation explicite, LiftRun peut **écrire** dans Apple Santé : tes séances et courses (entraînements, calories, distance) et ton journal alimentaire (énergie, protéines, glucides, lipides). Supprimer une entrée dans LiftRun supprime aussi les données Santé associées. LiftRun ne **lit** aucune donnée de Santé. Tu peux révoquer cet accès à tout moment dans Réglages → Santé → Accès aux données. Les données Santé sont gérées par Apple selon sa [politique de confidentialité](https://www.apple.com/legal/privacy/).
+
 ## Achats intégrés
 
 L'éventuel achat « LiftRun Premium » est traité intégralement par Apple (App Store). L'application ne voit ni ne stocke aucune information de paiement.

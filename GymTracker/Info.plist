@@ -4,6 +4,8 @@
 <dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>LiftRun enregistre tes séances, tes courses et ta nutrition dans Apple Santé.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

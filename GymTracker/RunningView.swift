@@ -41,6 +41,18 @@ struct RunningView: View {
                                              routeEncoded: result.route)
                         context.insert(run)
                         try? context.save()
+
+                        // Enregistre la course dans Apple Santé
+                        let weight = UserDefaults.standard.double(forKey: "profileWeightKg")
+                        let kcal = CalorieEstimator.runKcal(distanceKm: run.distanceKm,
+                                                            weightKg: weight > 0 ? weight : 70)
+                        let start = run.date.addingTimeInterval(-TimeInterval(run.durationSeconds))
+                        Task {
+                            await HealthKitManager.shared.saveRun(
+                                start: start, durationSeconds: run.durationSeconds,
+                                kcal: kcal, distanceMeters: run.distanceMeters)
+                        }
+
                         // laisse la vue de course se refermer avant la célébration
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                             celebratedRun = run

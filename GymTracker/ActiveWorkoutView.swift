@@ -114,6 +114,17 @@ struct ActiveWorkoutView: View {
         }
         try? context.save()
         restTimer.stop()   // coupe chrono de repos, Live Activity et notification
+
+        // Enregistre l'entraînement dans Apple Santé
+        let duration = session.durationSeconds
+        let weight = UserDefaults.standard.double(forKey: "profileWeightKg")
+        let kcal = CalorieEstimator.workoutKcal(durationSeconds: duration,
+                                                weightKg: weight > 0 ? weight : 70)
+        Task {
+            await HealthKitManager.shared.saveStrengthWorkout(
+                start: startDate, durationSeconds: duration, kcal: kcal)
+        }
+
         withAnimation(.easeOut(duration: 0.3)) { showCelebration = true }
     }
 }
