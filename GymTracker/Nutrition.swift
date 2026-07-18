@@ -197,14 +197,19 @@ enum FoodCategory: Int, CaseIterable, Identifiable {
 
 enum FoodCatalog {
     static let all: [CiqualFood] = {
-        guard let url = Bundle.main.url(forResource: "foods_ciqual", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let items = try? JSONDecoder().decode([CiqualFood].self, from: data)
-        else {
-            assertionFailure("foods_ciqual.json introuvable dans le bundle")
-            return []
+        func load(_ resource: String) -> [CiqualFood] {
+            guard let url = Bundle.main.url(forResource: resource, withExtension: "json"),
+                  let data = try? Data(contentsOf: url),
+                  let items = try? JSONDecoder().decode([CiqualFood].self, from: data)
+            else { return [] }
+            return items
         }
-        return items
+        let ciqual = load("foods_ciqual")
+        assert(!ciqual.isEmpty, "foods_ciqual.json introuvable dans le bundle")
+        // foods_custom.json : compléments hors CIQUAL (whey, sodas de marque…),
+        // valeurs issues des étiquettes produits
+        return (ciqual + load("foods_custom"))
+            .sorted { $0.n.localizedCaseInsensitiveCompare($1.n) == .orderedAscending }
     }()
 
     /// Recherche insensible à la casse et aux accents, filtrable par catégorie

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AudioToolbox
 
 // MARK: - Série en cours de saisie (draft, non persisté avant la fin)
 
@@ -266,6 +267,7 @@ final class RestTimerModel: ObservableObject {
     @Published var isRunning = false
 
     private var timer: Timer?
+    private var endDate = Date.now
     private var exerciseName = ""
     private var workoutName = ""
 
@@ -275,6 +277,9 @@ final class RestTimerModel: ObservableObject {
         self.workoutName = workoutName
         total = max(seconds, 1)
         remaining = seconds
+        // le décompte s'appuie sur une date de fin : même référence que la
+        // Dynamic Island, et toujours juste après un passage en arrière-plan
+        endDate = Date.now.addingTimeInterval(TimeInterval(seconds))
         isRunning = true
 
         // Dynamic Island + écran verrouillé + notification de fin
@@ -282,22 +287,30 @@ final class RestTimerModel: ObservableObject {
         NotificationManager.shared.scheduleRestEnd(after: seconds, exerciseName: exerciseName)
 
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                if self.remaining > 0 {
-                    self.remaining -= 1
-                } else {
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    self.stop()
-                }
+            Task { @MainActor in self?.tick() }
+        }
+    }
+
+    private func tick() {
+        let left = Int(ceil(endDate.timeIntervalSinceNow))
+        if left > 0 {
+            remaining = left
+        } else {
+            remaining = 0
+            // son + haptique seulement si la fin vient d'arriver
+            // (pas de fanfare tardive au retour dans l'app)
+            if endDate.timeIntervalSinceNow > -3 {
+                AudioServicesPlaySystemSound(1007)
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
+            stop()
         }
     }
 
     func add(_ seconds: Int) {
-        remaining += seconds
+        endDate = endDate.addingTimeInterval(TimeInterval(seconds))
+        remaining = max(0, Int(ceil(endDate.timeIntervalSinceNow)))
         total += seconds
-        let endDate = Date.now.addingTimeInterval(TimeInterval(remaining))
         LiveActivityManager.shared.updateRest(exerciseName: exerciseName, endDate: endDate, totalSeconds: total)
         NotificationManager.shared.scheduleRestEnd(after: remaining, exerciseName: exerciseName)
     }

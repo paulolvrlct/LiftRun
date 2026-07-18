@@ -178,15 +178,20 @@ struct HistoryView: View {
                 ForEach(filteredEntries) { entry in
                     switch entry {
                     case .workout(let session):
-                        SessionRow(session: session)
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    context.delete(session)
-                                    try? context.save()
-                                } label: {
-                                    Label("Supprimer", systemImage: "trash")
-                                }
+                        NavigationLink {
+                            SessionDetailView(session: session)
+                        } label: {
+                            SessionRow(session: session)
+                        }
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                context.delete(session)
+                                try? context.save()
+                            } label: {
+                                Label("Supprimer", systemImage: "trash")
                             }
+                        }
                     case .run(let run):
                         NavigationLink {
                             RunDetailView(run: run)
@@ -206,6 +211,83 @@ struct HistoryView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Détail d'une séance passée
+
+struct SessionDetailView: View {
+    let session: WorkoutSession
+
+    /// Séries groupées par exercice, dans l'ordre des séries
+    private var exercises: [(name: String, sets: [SetRecord])] {
+        Dictionary(grouping: session.sets, by: \.exerciseName)
+            .map { (name: $0.key, sets: $0.value.sorted { $0.setIndex < $1.setIndex }) }
+            .sorted { $0.name < $1.name }
+    }
+
+    private var burnedKcal: Int {
+        let stored = UserDefaults.standard.double(forKey: "profileWeightKg")
+        return CalorieEstimator.workoutKcal(durationSeconds: session.durationSeconds,
+                                            weightKg: stored > 0 ? stored : 70)
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                HStack(spacing: 12) {
+                    detailTile(PaceFormatter.duration(session.durationSeconds), "durée")
+                    detailTile("\(session.sets.count)", "séries")
+                    detailTile(session.totalVolume >= 1000
+                               ? String(format: "%.1f t", session.totalVolume / 1000)
+                               : "\(Int(session.totalVolume)) kg", "volume")
+                    detailTile("\(burnedKcal)", "kcal")
+                }
+
+                ForEach(exercises, id: \.name) { exercise in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(exercise.name)
+                                .font(.subheadline.weight(.semibold))
+                            Spacer()
+                            Text("\(exercise.sets.count) série\(exercise.sets.count > 1 ? "s" : "")")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        ForEach(exercise.sets) { set in
+                            HStack {
+                                Text("Série \(set.setIndex)")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(set.weight > 0
+                                     ? "\(set.reps) × \(set.weight.clean) kg"
+                                     : "\(set.reps) reps")
+                                    .font(.footnote.monospacedDigit().weight(.medium))
+                            }
+                        }
+                    }
+                    .padding(14)
+                    .background(.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
+                }
+            }
+            .padding()
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(session.templateName)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func detailTile(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 4) {
+            Text(value).font(.subheadline.weight(.semibold).monospacedDigit())
+            Text(label).font(.caption2).foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
     }
 }
 
