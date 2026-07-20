@@ -5,6 +5,8 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \WorkoutSession.date, order: .reverse) private var sessions: [WorkoutSession]
     @Query(sort: \RunSession.date, order: .reverse) private var runs: [RunSession]
+    @Query(sort: \Supplement.order) private var supplements: [Supplement]
+    @Query private var intakes: [SupplementIntake]
 
     @State private var displayedMonth = Date.now
     @State private var selectedDay: Date? = nil
@@ -79,6 +81,8 @@ struct HistoryView: View {
     private func dayCell(_ day: Date) -> some View {
         let hasSession = sessions.contains { calendar.isDate($0.date, inSameDayAs: day) }
         let hasRun = runs.contains { calendar.isDate($0.date, inSameDayAs: day) }
+        let hasSupplements = SupplementTracker.isComplete(day: day, supplements: supplements,
+                                                          intakes: intakes)
         let isToday = calendar.isDateInToday(day)
         let isSelected = selectedDay.map { calendar.isDate($0, inSameDayAs: day) } ?? false
 
@@ -96,7 +100,10 @@ struct HistoryView: View {
                     if hasRun {
                         Circle().fill(Color.green).frame(width: 5, height: 5)
                     }
-                    if !hasSession && !hasRun {
+                    if hasSupplements {
+                        Circle().fill(Color.pink).frame(width: 5, height: 5)
+                    }
+                    if !hasSession && !hasRun && !hasSupplements {
                         Circle().fill(.clear).frame(width: 5, height: 5)
                     }
                 }

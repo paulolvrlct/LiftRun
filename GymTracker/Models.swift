@@ -145,6 +145,37 @@ final class FoodEntry {
     var fat: Double { fatPer100 * grams / 100 }
 }
 
+// MARK: - Compléments quotidiens (checklist)
+
+@Model
+final class Supplement {
+    var name: String
+    var emoji: String
+    var dose: String          // libre : « 5 g », « 1 gélule », « 30 g »
+    var order: Int
+    var isActive: Bool
+
+    init(name: String, emoji: String = "💊", dose: String = "", order: Int = 0, isActive: Bool = true) {
+        self.name = name
+        self.emoji = emoji
+        self.dose = dose
+        self.order = order
+        self.isActive = isActive
+    }
+}
+
+/// Une prise cochée, un jour donné (date ramenée au début de journée)
+@Model
+final class SupplementIntake {
+    var date: Date
+    var supplementName: String
+
+    init(date: Date, supplementName: String) {
+        self.date = Calendar.current.startOfDay(for: date)
+        self.supplementName = supplementName
+    }
+}
+
 // MARK: - Conteneur SwiftData partagé (App Group)
 // Ce fichier appartient aux DEUX cibles : l'app et la widget extension lisent
 // la même base via le conteneur du groupe `group.fr.devshield.gymtracker`.
@@ -160,7 +191,7 @@ enum SharedStore {
     static var schema: Schema {
         Schema([WorkoutTemplate.self, ExerciseTemplate.self,
                 WorkoutSession.self, SetRecord.self, RunSession.self,
-                FoodEntry.self])
+                FoodEntry.self, Supplement.self, SupplementIntake.self])
     }
 
     static func makeContainer() throws -> ModelContainer {

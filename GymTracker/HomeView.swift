@@ -60,6 +60,12 @@ struct HomeView: View {
                         NutritionHomeCard()
                     }
                     .buttonStyle(.plain)
+                    NavigationLink {
+                        SupplementsView()
+                    } label: {
+                        SupplementsCard()
+                    }
+                    .buttonStyle(.plain)
                     quickStartSection
                     if let last = sessions.first { recentActivity(last) }
                     footerSignature
