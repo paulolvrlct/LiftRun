@@ -2,8 +2,16 @@ import SwiftUI
 
 struct RootTabView: View {
     @Environment(\.modelContext) private var context
+    @ObservedObject private var premium = PremiumStore.shared
     @State private var selection = 0
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("accentTheme") private var accentRaw = AccentTheme.indigo.rawValue
+
+    private var accent: Color {
+        // le thème n'est appliqué qu'aux abonnés Premium
+        guard premium.isPremium, let t = AccentTheme(rawValue: accentRaw) else { return .indigo }
+        return t.color
+    }
 
     var body: some View {
         TabView(selection: $selection) {
@@ -27,7 +35,7 @@ struct RootTabView: View {
                 .tabItem { Label("Progression", systemImage: "chart.xyaxis.line") }
                 .tag(4)
         }
-        .tint(.indigo)
+        .tint(accent)
         // Premier lancement : demande prénom / taille / poids / sexe
         .fullScreenCover(isPresented: Binding(
             get: { !hasCompletedOnboarding },

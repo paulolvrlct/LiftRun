@@ -19,6 +19,13 @@ struct TemplatesView: View {
                         TemplateCard(template: template) {
                             activeTemplate = template
                         }
+                        .contextMenu {
+                            Button {
+                                duplicate(template)
+                            } label: {
+                                Label("Dupliquer", systemImage: "plus.square.on.square")
+                            }
+                        }
                     }
                 }
                 .padding()
@@ -46,6 +53,27 @@ struct TemplatesView: View {
                 ActiveWorkoutView(template: template)
             }
         }
+    }
+
+    private func duplicate(_ template: WorkoutTemplate) {
+        guard templates.count < PremiumStore.FreeTier.maxTemplates || premium.isPremium else {
+            showPaywall = true
+            return
+        }
+        let copy = WorkoutTemplate(name: template.name + " (copie)",
+                                   subtitle: template.subtitle,
+                                   icon: template.icon,
+                                   order: templates.count)
+        context.insert(copy)
+        for ex in template.sortedExercises {
+            let newEx = ExerciseTemplate(name: ex.name, targetSets: ex.targetSets,
+                                         repRange: ex.repRange, restSeconds: ex.restSeconds,
+                                         notes: ex.notes, order: ex.order, catalogID: ex.catalogID)
+            newEx.workout = copy
+            context.insert(newEx)
+        }
+        try? context.save()
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
 }
 
@@ -147,6 +175,12 @@ struct TemplateEditorView: View {
                     for i in offsets { context.delete(sorted[i]) }
                     try? context.save()
                 }
+                .onMove { source, destination in
+                    var sorted = template.sortedExercises
+                    sorted.move(fromOffsets: source, toOffset: destination)
+                    for (i, ex) in sorted.enumerated() { ex.order = i }
+                    try? context.save()
+                }
 
                 Button {
                     showLibraryPicker = true
@@ -176,6 +210,7 @@ struct TemplateEditorView: View {
         }
         .navigationTitle("Modifier")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar { EditButton() }
         .sheet(isPresented: $showLibraryPicker) {
             ExerciseLibraryView { catalogEx in
                 let ex = ExerciseTemplate(

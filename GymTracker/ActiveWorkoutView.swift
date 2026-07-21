@@ -37,10 +37,35 @@ struct ActiveWorkoutView: View {
             .map { ($0.reps, $0.weight) }
     }
 
+    /// Nombre total de séries visées sur la séance
+    private var targetSetCount: Int {
+        template.sortedExercises.reduce(0) { $0 + $1.targetSets }
+    }
+
+    // Barre de progression de la séance
+    private var sessionProgress: some View {
+        let total = max(targetSetCount, 1)
+        let done = min(loggedSets.count, total)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("Progression").font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Text("\(done) / \(total) séries")
+                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+            }
+            ProgressView(value: Double(done), total: Double(total))
+                .tint(.indigo)
+        }
+        .padding(14)
+        .background(.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 14) {
+                    sessionProgress
                     ForEach(template.sortedExercises) { exercise in
                         ExerciseLogCard(
                             exercise: exercise,
@@ -393,6 +418,11 @@ private struct RestTimerBar: View {
             }
 
             Spacer()
+
+            Button("−15 s") { timer.add(-15) }
+                .buttonStyle(.bordered)
+                .font(.footnote.weight(.semibold))
+                .disabled(timer.remaining <= 15)
 
             Button("+15 s") { timer.add(15) }
                 .buttonStyle(.bordered)

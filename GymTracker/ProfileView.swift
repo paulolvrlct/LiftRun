@@ -133,16 +133,50 @@ struct OnboardingView: View {
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var premium = PremiumStore.shared
     @AppStorage("profileName") private var name = ""
     @AppStorage("profileAge") private var age = 25
     @AppStorage("profileHeightCm") private var heightCm = 175
     @AppStorage("profileWeightKg") private var weightKg = 70.0
     @AppStorage("profileSex") private var sexRaw = UserSex.unspecified.rawValue
 
+    // Rappels de séance
+    @AppStorage("remindersEnabled") private var remindersEnabled = false
+    @AppStorage("reminderDays") private var reminderDaysRaw = ""      // ex : "2,4,6"
+    @AppStorage("reminderHour") private var reminderHour = 18
+    @AppStorage("reminderMinute") private var reminderMinute = 0
+    // Thème (Premium)
+    @AppStorage("accentTheme") private var accentRaw = AccentTheme.indigo.rawValue
+    @State private var showPaywall = false
+
+    private let weekdays: [(id: Int, short: String)] = [
+        (2, "L"), (3, "M"), (4, "M"), (5, "J"), (6, "V"), (7, "S"), (1, "D")
+    ]
+    private var reminderDays: Set<Int> {
+        Set(reminderDaysRaw.split(separator: ",").compactMap { Int($0) })
+    }
+
     private var bmi: Double? {
         guard heightCm > 0, weightKg > 0 else { return nil }
         let meters = Double(heightCm) / 100
         return weightKg / (meters * meters)
+    }
+
+    private func applyReminders() {
+        if remindersEnabled {
+            NotificationManager.shared.requestAuthorization()
+            NotificationManager.shared.scheduleWeeklyReminders(
+                weekdays: reminderDays, hour: reminderHour, minute: reminderMinute)
+        } else {
+            NotificationManager.shared.clearWeeklyReminders()
+        }
+    }
+
+    private func toggleDay(_ id: Int) {
+        var days = reminderDays
+        if days.contains(id) { days.remove(id) } else { days.insert(id) }
+        reminderDaysRaw = days.sorted().map(String.init).joined(separator: ",")
+        applyReminders()
     }
 
     var body: some View {
@@ -173,6 +207,71 @@ struct ProfileView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                Section("Rappels de séance") {
+                    Toggle("Me rappeler de m'entraîner", isOn: $remindersEnabled)
+                        .onChange(of: remindersEnabled) { applyReminders() }
+                    if remindersEnabled {
+                        HStack(spacing: 6) {
+                            ForEach(weekdays, id: \.id) { day in
+                                let on = reminderDays.contains(day.id)
+                                Button {
+                                    toggleDay(day.id)
+                                } label: {
+                                    Text(day.short)
+                                        .font(.footnote.weight(.semibold))
+                                        .frame(width: 34, height: 34)
+                                        .background(on ? Color.indigo : Color(.tertiarySystemFill),
+                                                    in: Circle())
+                                        .foregroundStyle(on ? .white : .primary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        DatePicker("Heure",
+                                   selection: Binding(
+                                    get: {
+                                        Calendar.current.date(from: DateComponents(
+                                            hour: reminderHour, minute: reminderMinute)) ?? .now
+                                    },
+                                    set: {
+                                        let c = Calendar.current.dateComponents([.hour, .minute], from: $0)
+                                        reminderHour = c.hour ?? 18
+                                        reminderMinute = c.minute ?? 0
+                                        applyReminders()
+                                    }),
+                                   displayedComponents: .hourAndMinute)
+                    }
+                }
+
+                Section("Apparence") {
+                    if premium.isPremium {
+                        Picker("Couleur d'accent", selection: $accentRaw) {
+                            ForEach(AccentTheme.allCases) { theme in
+                                Label {
+                                    Text(theme.label)
+                                } icon: {
+                                    Image(systemName: "circle.fill").foregroundStyle(theme.color)
+                                }
+                                .tag(theme.rawValue)
+                            }
+                        }
+                    } else {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            Label("Couleur d'accent (Premium)", systemImage: "paintpalette")
+                        }
+                    }
+                }
+
+                Section {
+                    NavigationLink {
+                        WorkoutToolsView()
+                    } label: {
+                        Label("Outils (disques, export CSV)", systemImage: "wrench.and.screwdriver")
+                    }
+                }
+
                 Section("À propos") {
                     LabeledContent("Version",
                                    value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
@@ -180,6 +279,7 @@ struct ProfileView: View {
                     NavigationLink("Licences et crédits") { CreditsView() }
                 }
             }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
             .navigationTitle("Mon profil")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

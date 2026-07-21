@@ -73,6 +73,30 @@ struct ProgressChartsView: View {
             exercisePicker
             chartCard
             statsCard
+            oneRepMaxCard
+        }
+    }
+
+    // MARK: 1RM estimé (max théorique)
+
+    @ViewBuilder
+    private var oneRepMaxCard: some View {
+        let e1rm = StrengthMath.best1RM(exerciseName: selectedExercise, in: allSets)
+        if e1rm > 0 {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Max théorique (1RM estimé)", systemImage: "bolt.heart.fill")
+                    .font(.headline)
+                Text("\(e1rm.clean) kg")
+                    .font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit())
+                    .foregroundStyle(.indigo)
+                Text("Estimé par la formule d'Epley à partir de ta meilleure série. Indicatif : ne tente pas un 1RM réel sans échauffement ni pareur.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(.background, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .shadow(color: .black.opacity(0.06), radius: 8, y: 3)
         }
     }
 

@@ -49,4 +49,33 @@ final class NotificationManager {
                                             content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request)
     }
+
+    private let weeklyPrefix = "weekly-workout-"
+
+    /// Programme des rappels hebdomadaires récurrents aux jours choisis.
+    /// weekdays : 1 = dimanche … 7 = samedi (convention Apple).
+    func scheduleWeeklyReminders(weekdays: Set<Int>, hour: Int, minute: Int) {
+        clearWeeklyReminders()
+        guard !weekdays.isEmpty else { return }
+        for weekday in weekdays {
+            let content = UNMutableNotificationContent()
+            content.title = "C'est l'heure de bouger 💪"
+            content.body = "Ta séance t'attend dans LiftRun."
+            content.sound = .default
+
+            var comps = DateComponents()
+            comps.weekday = weekday
+            comps.hour = hour
+            comps.minute = minute
+            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+            let request = UNNotificationRequest(identifier: "\(weeklyPrefix)\(weekday)",
+                                                content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request)
+        }
+    }
+
+    func clearWeeklyReminders() {
+        let ids = (1...7).map { "\(weeklyPrefix)\($0)" }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+    }
 }
