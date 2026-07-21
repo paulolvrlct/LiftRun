@@ -14,12 +14,13 @@ enum SupplementTracker {
             && Calendar.current.isDate($0.date, inSameDayAs: d) }
     }
 
-    /// Jour « complet » : tous les compléments actifs ont été cochés
+    /// Jour « complet » : tous les compléments *quotidiens* actifs ont été cochés.
+    /// Les optionnels (whey, pre-workout…) n'entrent pas dans la complétude.
     static func isComplete(day: Date, supplements: [Supplement],
                            intakes: [SupplementIntake]) -> Bool {
-        let active = supplements.filter(\.isActive)
-        guard !active.isEmpty else { return false }
-        return active.allSatisfy { isTaken($0, on: day, intakes: intakes) }
+        let daily = supplements.filter { $0.isActive && $0.isDaily }
+        guard !daily.isEmpty else { return false }
+        return daily.allSatisfy { isTaken($0, on: day, intakes: intakes) }
     }
 
     /// Jours consécutifs de routine complète, en tolérant que la journée
@@ -46,9 +47,10 @@ struct SupplementsCard: View {
     @Query(sort: \Supplement.order) private var supplements: [Supplement]
     @Query private var intakes: [SupplementIntake]
 
-    private var active: [Supplement] { supplements.filter(\.isActive) }
+    // seuls les quotidiens comptent dans la progression / la série
+    private var daily: [Supplement] { supplements.filter { $0.isActive && $0.isDaily } }
     private var takenCount: Int {
-        active.filter { SupplementTracker.isTaken($0, on: .now, intakes: intakes) }.count
+        daily.filter { SupplementTracker.isTaken($0, on: .now, intakes: intakes) }.count
     }
     private var streak: Int {
         SupplementTracker.streak(supplements: supplements, intakes: intakes)
@@ -60,8 +62,8 @@ struct SupplementsCard: View {
                 Circle()
                     .stroke(Color(.tertiarySystemFill), lineWidth: 5)
                 Circle()
-                    .trim(from: 0, to: active.isEmpty ? 0
-                          : Double(takenCount) / Double(active.count))
+                    .trim(from: 0, to: daily.isEmpty ? 0
+                          : Double(takenCount) / Double(daily.count))
                     .stroke(Color.pink, style: StrokeStyle(lineWidth: 5, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .animation(.spring(response: 0.5, dampingFraction: 0.8), value: takenCount)
@@ -73,11 +75,11 @@ struct SupplementsCard: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Compléments").font(.headline).foregroundStyle(.primary)
-                if active.isEmpty {
+                if daily.isEmpty {
                     Text("Choisis ta routine quotidienne")
                         .font(.caption).foregroundStyle(.secondary)
                 } else {
-                    Text("\(takenCount) / \(active.count) aujourd'hui"
+                    Text("\(takenCount) / \(daily.count) aujourd'hui"
                          + (streak > 0 ? " · \(streak) j d'affilée 🔥" : ""))
                         .font(.caption).foregroundStyle(.secondary)
                 }
@@ -105,8 +107,10 @@ struct SupplementsView: View {
 
     private var calendar: Calendar { Calendar.current }
     private var active: [Supplement] { supplements.filter(\.isActive) }
+    // la complétude / série ne concerne que les quotidiens
+    private var dailyActive: [Supplement] { active.filter(\.isDaily) }
     private var takenCount: Int {
-        active.filter { SupplementTracker.isTaken($0, on: day, intakes: intakes) }.count
+        dailyActive.filter { SupplementTracker.isTaken($0, on: day, intakes: intakes) }.count
     }
     private var streak: Int {
         SupplementTracker.streak(supplements: supplements, intakes: intakes)
@@ -158,10 +162,11 @@ struct SupplementsView: View {
 
     private var headerCard: some View {
         VStack(spacing: 10) {
-            Text("\(takenCount) / \(active.count)")
+            Text("\(takenCount) / \(dailyActive.count)")
                 .font(.system(size: 40, weight: .bold, design: .rounded).monospacedDigit())
                 .contentTransition(.numericText())
-            Text(takenCount == active.count ? "Routine complète 💪" : "compléments pris")
+            Text(!dailyActive.isEmpty && takenCount == dailyActive.count
+                 ? "Routine complète 💪" : "quotidiens pris")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             if streak > 0 {
@@ -188,9 +193,18 @@ struct SupplementsView: View {
                     HStack(spacing: 14) {
                         Text(supplement.emoji).font(.title2)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(supplement.name)
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(.primary)
+                            HStack(spacing: 6) {
+                                Text(supplement.name)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(.primary)
+                                if !supplement.isDaily {
+                                    Text("Optionnel")
+                                        .font(.caption2.weight(.medium))
+                                        .foregroundStyle(.secondary)
+                                        .padding(.horizontal, 6).padding(.vertical, 2)
+                                        .background(Color(.tertiarySystemFill), in: Capsule())
+                                }
+                            }
                             if !supplement.dose.isEmpty {
                                 Text(supplement.dose)
                                     .font(.caption).foregroundStyle(.secondary)
@@ -208,6 +222,13 @@ struct SupplementsView: View {
                 }
                 .buttonStyle(.plain)
                 .contextMenu {
+                    Button {
+                        supplement.isDaily.toggle()
+                        try? context.save()
+                    } label: {
+                        Label(supplement.isDaily ? "Marquer comme optionnel" : "Marquer comme quotidien",
+                              systemImage: supplement.isDaily ? "calendar.badge.minus" : "calendar.badge.checkmark")
+                    }
                     Button(role: .destructive) {
                         context.delete(supplement)
                         try? context.save()
@@ -278,23 +299,24 @@ struct SupplementPickerView: View {
 
     @State private var customName = ""
     @State private var customDose = ""
+    @State private var customDaily = true
 
-    /// Compléments proposés par défaut (emoji, nom, dose usuelle)
-    private let presets: [(emoji: String, name: String, dose: String)] = [
-        ("💪", "Créatine", "5 g"),
-        ("🥛", "Whey", "30 g"),
-        ("🧂", "Magnésium", "300 mg"),
-        ("☀️", "Vitamine D", "1 000 UI"),
-        ("🐟", "Oméga 3", "1 g"),
-        ("💊", "Multivitamines", "1 gélule"),
-        ("🍊", "Vitamine C", "500 mg"),
-        ("🦴", "Zinc", "15 mg"),
-        ("🧬", "BCAA", "10 g"),
-        ("🌿", "Ashwagandha", "600 mg"),
-        ("🩸", "Fer", "14 mg"),
-        ("🦠", "Probiotiques", "1 gélule"),
-        ("⚡", "Pre-workout", "1 dose"),
-        ("💧", "Électrolytes", "1 dose"),
+    /// Compléments proposés par défaut (emoji, nom, dose usuelle, quotidien par défaut)
+    private let presets: [(emoji: String, name: String, dose: String, daily: Bool)] = [
+        ("💪", "Créatine", "5 g", true),
+        ("🥛", "Whey", "30 g", false),
+        ("🧂", "Magnésium", "300 mg", true),
+        ("☀️", "Vitamine D", "1 000 UI", true),
+        ("🐟", "Oméga 3", "1 g", true),
+        ("💊", "Multivitamines", "1 gélule", true),
+        ("🍊", "Vitamine C", "500 mg", true),
+        ("🦴", "Zinc", "15 mg", true),
+        ("🧬", "BCAA", "10 g", false),
+        ("🌿", "Ashwagandha", "600 mg", true),
+        ("🩸", "Fer", "14 mg", true),
+        ("🦠", "Probiotiques", "1 gélule", true),
+        ("⚡", "Pre-workout", "1 dose", false),
+        ("💧", "Électrolytes", "1 dose", false),
     ]
 
     private var existingNames: Set<String> {
@@ -308,13 +330,23 @@ struct SupplementPickerView: View {
                     ForEach(presets, id: \.name) { preset in
                         let already = existingNames.contains(preset.name.lowercased())
                         Button {
-                            add(name: preset.name, emoji: preset.emoji, dose: preset.dose)
+                            add(name: preset.name, emoji: preset.emoji, dose: preset.dose,
+                                isDaily: preset.daily)
                         } label: {
                             HStack(spacing: 12) {
                                 Text(preset.emoji).font(.title3)
                                 VStack(alignment: .leading, spacing: 1) {
-                                    Text(preset.name)
-                                        .foregroundStyle(already ? .secondary : .primary)
+                                    HStack(spacing: 6) {
+                                        Text(preset.name)
+                                            .foregroundStyle(already ? .secondary : .primary)
+                                        if !preset.daily {
+                                            Text("Optionnel")
+                                                .font(.caption2.weight(.medium))
+                                                .foregroundStyle(.secondary)
+                                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                                .background(Color(.tertiarySystemFill), in: Capsule())
+                                        }
+                                    }
                                     Text(preset.dose)
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
@@ -330,11 +362,13 @@ struct SupplementPickerView: View {
                 Section("Autre complément") {
                     TextField("Nom", text: $customName)
                     TextField("Dose (facultatif)", text: $customDose)
+                    Toggle("Quotidien", isOn: $customDaily)
+                        .tint(.pink)
                     Button("Ajouter") {
                         let name = customName.trimmingCharacters(in: .whitespaces)
                         guard !name.isEmpty else { return }
-                        add(name: name, emoji: "💊", dose: customDose)
-                        customName = ""; customDose = ""
+                        add(name: name, emoji: "💊", dose: customDose, isDaily: customDaily)
+                        customName = ""; customDose = ""; customDaily = true
                     }
                     .disabled(customName.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -349,10 +383,10 @@ struct SupplementPickerView: View {
         }
     }
 
-    private func add(name: String, emoji: String, dose: String) {
+    private func add(name: String, emoji: String, dose: String, isDaily: Bool) {
         guard !existingNames.contains(name.lowercased()) else { return }
         context.insert(Supplement(name: name, emoji: emoji, dose: dose,
-                                  order: supplements.count))
+                                  order: supplements.count, isDaily: isDaily))
         try? context.save()
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }

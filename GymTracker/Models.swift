@@ -154,13 +154,18 @@ final class Supplement {
     var dose: String          // libre : « 5 g », « 1 gélule », « 30 g »
     var order: Int
     var isActive: Bool
+    // quotidien (compte dans la routine et la série) vs optionnel (whey,
+    // pre-workout… pris quand on veut, sans casser la régularité).
+    var isDaily: Bool = true
 
-    init(name: String, emoji: String = "💊", dose: String = "", order: Int = 0, isActive: Bool = true) {
+    init(name: String, emoji: String = "💊", dose: String = "", order: Int = 0,
+         isActive: Bool = true, isDaily: Bool = true) {
         self.name = name
         self.emoji = emoji
         self.dose = dose
         self.order = order
         self.isActive = isActive
+        self.isDaily = isDaily
     }
 }
 
