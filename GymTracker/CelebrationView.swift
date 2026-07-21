@@ -192,6 +192,7 @@ struct WorkoutCelebrationView: View {
     let setCount: Int
     let volume: Double
     let durationSeconds: Int
+    var records: [PRResult] = []
     var onContinue: () -> Void
 
     @State private var appeared = false
@@ -214,12 +215,31 @@ struct WorkoutCelebrationView: View {
                     .scaleEffect(appeared ? 1 : 0.2)
                     .rotationEffect(.degrees(appeared ? 0 : -20))
 
-                Text("Séance terminée !")
+                Text(records.isEmpty ? "Séance terminée !" : "Séance record ! 🏆")
                     .font(.title.bold())
 
-                Text("Belle séance, continue comme ça 🔥")
+                Text(records.isEmpty ? "Belle séance, continue comme ça 🔥"
+                                     : "Tu as battu \(records.count) record\(records.count > 1 ? "s" : "") 🔥")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+
+                if !records.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(records.prefix(4)) { pr in
+                            Label(pr.line, systemImage: "trophy.fill")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.orange)
+                        }
+                        if records.count > 4 {
+                            Text("et \(records.count - 4) de plus…")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(Color.orange.opacity(0.12),
+                                in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
 
                 HStack(spacing: 12) {
                     celebrationTile("\(setCount)", "séries")

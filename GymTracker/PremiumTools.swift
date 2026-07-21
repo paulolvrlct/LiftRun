@@ -26,6 +26,100 @@ enum StrengthMath {
     }
 }
 
+// MARK: - Records personnels (gratuit)
+
+enum PRKind { case weight, oneRM, reps }
+
+struct PRResult: Equatable, Identifiable {
+    let id = UUID()
+    let exercise: String
+    let kind: PRKind
+    let value: Double      // kg pour weight/oneRM, reps sinon
+    let delta: Double      // écart avec l'ancien record (>= 0)
+
+    /// Message court pour la célébration de fin de séance
+    var line: String {
+        switch kind {
+        case .weight:
+            let d = delta > 0 ? String(format: " (+%@)", delta.clean) : ""
+            return "\(exercise) — \(value.clean) kg\(d)"
+        case .oneRM:
+            return "\(exercise) — nouveau 1RM : \(value.clean) kg"
+        case .reps:
+            return "\(exercise) — \(Int(value)) reps"
+        }
+    }
+}
+
+enum PersonalRecords {
+    /// Détecte si (reps, weight) bat un record de l'exercice, en comparant à
+    /// toutes les séries antérieures (historique + séance en cours).
+    /// Renvoie nil s'il n'y a pas d'antériorité (première fois = pas un record).
+    static func check(exercise: String, reps: Int, weight: Double,
+                      prior: [(reps: Int, weight: Double)]) -> PRResult? {
+        guard !prior.isEmpty, reps > 0 else { return nil }
+
+        if weight > 0 {
+            let priorMaxWeight = prior.map(\.weight).max() ?? 0
+            if weight > priorMaxWeight + 0.001, priorMaxWeight > 0 {
+                return PRResult(exercise: exercise, kind: .weight,
+                                value: weight, delta: weight - priorMaxWeight)
+            }
+            let priorBest1RM = prior.map { StrengthMath.epley1RM(weight: $0.weight, reps: $0.reps) }.max() ?? 0
+            let new1RM = StrengthMath.epley1RM(weight: weight, reps: reps)
+            if new1RM > priorBest1RM + 0.001, priorBest1RM > 0 {
+                return PRResult(exercise: exercise, kind: .oneRM,
+                                value: (new1RM * 2).rounded() / 2, delta: new1RM - priorBest1RM)
+            }
+        } else {
+            // exercice au poids du corps : record sur les reps / secondes
+            let priorMaxReps = prior.map(\.reps).max() ?? 0
+            if reps > priorMaxReps, priorMaxReps > 0 {
+                return PRResult(exercise: exercise, kind: .reps,
+                                value: Double(reps), delta: Double(reps - priorMaxReps))
+            }
+        }
+        return nil
+    }
+}
+
+// MARK: - Flash « Record ! » (animation façon Duolingo)
+
+struct RecordFlashView: View {
+    let record: PRResult
+    @State private var pop = false
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text("🏆")
+                .font(.system(size: 54))
+                .scaleEffect(pop ? 1 : 0.3)
+                .rotationEffect(.degrees(pop ? 0 : -25))
+            Text("Record !")
+                .font(.title2.weight(.heavy))
+                .foregroundStyle(.white)
+            Text(record.line)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white.opacity(0.9))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.vertical, 22)
+        .padding(.horizontal, 30)
+        .background(
+            LinearGradient(colors: [.orange, .yellow],
+                           startPoint: .topLeading, endPoint: .bottomTrailing),
+            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+        )
+        .shadow(color: .orange.opacity(0.5), radius: 20, y: 8)
+        .scaleEffect(pop ? 1 : 0.6)
+        .opacity(pop ? 1 : 0)
+        .onAppear {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.5)) { pop = true }
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
+    }
+}
+
 // MARK: - Calculateur de disques (Premium)
 
 struct PlateCalculatorView: View {

@@ -26,6 +26,8 @@ struct ActiveWorkoutView: View {
     @State private var startDate = Date.now
     @State private var showCancelAlert = false
     @State private var showCelebration = false
+    @State private var prFlash: PRResult?
+    @State private var sessionPRs: [PRResult] = []
     @StateObject private var restTimer = RestTimerModel()
 
     /// Dernière série enregistrée pour cet exercice (dernière séance, dernière
@@ -110,11 +112,21 @@ struct ActiveWorkoutView: View {
                     WorkoutCelebrationView(
                         setCount: loggedSets.count,
                         volume: loggedSets.reduce(0) { $0 + Double($1.reps) * $1.weight },
-                        durationSeconds: Int(Date.now.timeIntervalSince(startDate))
+                        durationSeconds: Int(Date.now.timeIntervalSince(startDate)),
+                        records: sessionPRs
                     ) {
                         dismiss()
                     }
                     .transition(.opacity)
+                }
+            }
+            // Flash « Record ! » façon Duolingo
+            .overlay {
+                if let prFlash {
+                    RecordFlashView(record: prFlash)
+                        .id(prFlash.id)
+                        .allowsHitTesting(false)
+                        .transition(.scale(scale: 0.7).combined(with: .opacity))
                 }
             }
             .alert("Abandonner la séance ?", isPresented: $showCancelAlert) {
@@ -130,10 +142,25 @@ struct ActiveWorkoutView: View {
     }
 
     private func logSet(exercise: ExerciseTemplate, reps: Int, weight: Double) {
+        // séries antérieures pour cet exercice (historique + séance en cours)
+        let prior: [(reps: Int, weight: Double)] =
+            history.filter { $0.exerciseName == exercise.name }.map { ($0.reps, $0.weight) }
+            + loggedSets.filter { $0.exerciseName == exercise.name }.map { ($0.reps, $0.weight) }
+
         let index = loggedSets.filter { $0.exerciseName == exercise.name }.count + 1
         loggedSets.append(DraftSet(exerciseName: exercise.name, setIndex: index, reps: reps, weight: weight))
         restTimer.start(seconds: exercise.restSeconds, exerciseName: exercise.name, workoutName: template.name)
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+
+        // Record personnel ? → flash animé + mémorisé pour la célébration
+        if let pr = PersonalRecords.check(exercise: exercise.name, reps: reps,
+                                          weight: weight, prior: prior) {
+            sessionPRs.append(pr)
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { prFlash = pr }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                withAnimation(.easeOut(duration: 0.3)) { prFlash = nil }
+            }
+        }
     }
 
     private func finishWorkout() {
