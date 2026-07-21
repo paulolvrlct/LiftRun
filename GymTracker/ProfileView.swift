@@ -245,16 +245,39 @@ struct ProfileView: View {
 
                 Section("Apparence") {
                     if premium.isPremium {
-                        Picker("Couleur d'accent", selection: $accentRaw) {
+                        // grille de pastilles : chaque couleur garde la sienne
+                        // (un Picker teinté par le .tint global les uniformiserait)
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4),
+                                  spacing: 14) {
                             ForEach(AccentTheme.allCases) { theme in
-                                Label {
-                                    Text(theme.label)
-                                } icon: {
-                                    Image(systemName: "circle.fill").foregroundStyle(theme.color)
+                                let selected = accentRaw == theme.rawValue
+                                Button {
+                                    accentRaw = theme.rawValue
+                                } label: {
+                                    VStack(spacing: 4) {
+                                        Circle()
+                                            .fill(theme.color)
+                                            .frame(width: 34, height: 34)
+                                            .overlay {
+                                                if selected {
+                                                    Image(systemName: "checkmark")
+                                                        .font(.caption.weight(.bold))
+                                                        .foregroundStyle(.white)
+                                                }
+                                            }
+                                            .overlay {
+                                                Circle().stroke(.primary.opacity(selected ? 0.5 : 0),
+                                                                lineWidth: 2)
+                                            }
+                                        Text(theme.label)
+                                            .font(.caption2)
+                                            .foregroundStyle(selected ? .primary : .secondary)
+                                    }
                                 }
-                                .tag(theme.rawValue)
+                                .buttonStyle(.plain)
                             }
                         }
+                        .padding(.vertical, 4)
                     } else {
                         Button {
                             showPaywall = true
