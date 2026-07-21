@@ -133,7 +133,7 @@ struct PaywallView: View {
                             .padding(.vertical, 14)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.indigo)
+                    .tint(Color.brand)
                     .disabled(isPurchasing)
 
                     Button("Restaurer mes achats") {
@@ -160,7 +160,7 @@ struct PaywallView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(.indigo)
+                .foregroundStyle(Color.brand)
                 .frame(width: 30)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.subheadline.weight(.semibold))

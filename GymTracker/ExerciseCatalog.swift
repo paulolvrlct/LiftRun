@@ -114,9 +114,9 @@ struct ExerciseIllustration: View {
     var body: some View {
         Image(systemName: exercise.illustrationSymbol)
             .font(.system(size: size * 0.45))
-            .foregroundStyle(.indigo)
+            .foregroundStyle(Color.brand)
             .frame(width: size, height: size)
-            .background(Color.indigo.opacity(0.1))
+            .background(Color.brand.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: size * 0.2, style: .continuous))
     }
 }
@@ -155,14 +155,14 @@ struct ExerciseIllustrationBanner: View {
         VStack(spacing: 10) {
             Image(systemName: exercise.illustrationSymbol)
                 .font(.system(size: 64))
-                .foregroundStyle(.indigo)
+                .foregroundStyle(Color.brand)
             Text(exercise.categoryFR)
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 160)
-        .background(Color.indigo.opacity(0.08))
+        .background(Color.brand.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }

@@ -56,7 +56,7 @@ struct ActiveWorkoutView: View {
                     .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
             }
             ProgressView(value: Double(done), total: Double(total))
-                .tint(.indigo)
+                .tint(Color.brand)
         }
         .padding(14)
         .background(.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -235,7 +235,7 @@ private struct ExerciseLogCard: View {
                               : "Dernière : \(last.reps) reps",
                               systemImage: "clock.arrow.circlepath")
                             .font(.caption2)
-                            .foregroundStyle(.indigo)
+                            .foregroundStyle(Color.brand)
                     }
                 }
                 Spacer()
@@ -250,7 +250,7 @@ private struct ExerciseLogCard: View {
                         showAnimation = true
                     } label: {
                         Image(systemName: "book.fill")
-                            .foregroundStyle(.indigo)
+                            .foregroundStyle(Color.brand)
                     }
                 }
                 if !exercise.notes.isEmpty {
@@ -280,8 +280,8 @@ private struct ExerciseLogCard: View {
                             .font(.caption.monospacedDigit())
                             .padding(.horizontal, 10)
                             .padding(.vertical, 5)
-                            .background(Color.indigo.opacity(0.12), in: Capsule())
-                            .foregroundStyle(.indigo)
+                            .background(Color.brand.opacity(0.12), in: Capsule())
+                            .foregroundStyle(Color.brand)
                     }
                 }
             }
@@ -320,7 +320,7 @@ private struct ExerciseLogCard: View {
                         .frame(width: 46, height: 46)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(isDone ? .green : .indigo)
+                .tint(isDone ? .green : Color.brand)
                 .clipShape(Circle())
             }
         }
@@ -429,7 +429,7 @@ private struct RestTimerBar: View {
                     .stroke(Color(.tertiarySystemFill), lineWidth: 5)
                 Circle()
                     .trim(from: 0, to: CGFloat(timer.remaining) / CGFloat(timer.total))
-                    .stroke(Color.indigo, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                    .stroke(Color.brand, style: StrokeStyle(lineWidth: 5, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 1), value: timer.remaining)
                 Text("\(timer.remaining)")
@@ -461,7 +461,7 @@ private struct RestTimerBar: View {
                 Image(systemName: "forward.fill")
             }
             .buttonStyle(.borderedProminent)
-            .tint(.indigo)
+            .tint(Color.brand)
         }
         .padding(14)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))

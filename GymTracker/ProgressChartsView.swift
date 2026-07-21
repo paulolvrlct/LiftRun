@@ -88,7 +88,7 @@ struct ProgressChartsView: View {
                     .font(.headline)
                 Text("\(e1rm.clean) kg")
                     .font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(.indigo)
+                    .foregroundStyle(Color.brand)
                 Text("Estimé par la formule d'Epley à partir de ta meilleure série. Indicatif : ne tente pas un 1RM réel sans échauffement ni pareur.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -114,7 +114,7 @@ struct ProgressChartsView: View {
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(
-                                selectedExercise == name ? Color.indigo : Color(.tertiarySystemFill),
+                                selectedExercise == name ? Color.brand : Color(.tertiarySystemFill),
                                 in: Capsule()
                             )
                             .foregroundStyle(selectedExercise == name ? .white : .primary)
@@ -145,7 +145,7 @@ struct ProgressChartsView: View {
                         y: .value("Charge", point.maxWeight)
                     )
                     .foregroundStyle(
-                        LinearGradient(colors: [.indigo.opacity(0.3), .indigo.opacity(0.02)],
+                        LinearGradient(colors: [Color.brand.opacity(0.3), Color.brand.opacity(0.02)],
                                        startPoint: .top, endPoint: .bottom)
                     )
                     .interpolationMethod(.catmullRom)
@@ -154,7 +154,7 @@ struct ProgressChartsView: View {
                         x: .value("Date", point.date),
                         y: .value("Charge", point.maxWeight)
                     )
-                    .foregroundStyle(.indigo)
+                    .foregroundStyle(Color.brand)
                     .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
                     .interpolationMethod(.catmullRom)
 
@@ -162,7 +162,7 @@ struct ProgressChartsView: View {
                         x: .value("Date", point.date),
                         y: .value("Charge", point.maxWeight)
                     )
-                    .foregroundStyle(.indigo)
+                    .foregroundStyle(Color.brand)
                     .symbolSize(40)
                 }
                 .chartYAxisLabel("kg")
@@ -183,7 +183,7 @@ struct ProgressChartsView: View {
                      icon: "trophy.fill", color: .orange)
             statTile(title: "Dernière",
                      value: dataPoints.last.map { "\($0.maxWeight.clean) kg" } ?? "-",
-                     icon: "clock.fill", color: .indigo)
+                     icon: "clock.fill", color: Color.brand)
             statTile(title: "Évolution",
                      value: progression.map { String(format: "%+.0f %%", $0) } ?? "-",
                      icon: "arrow.up.right", color: .green)

@@ -169,8 +169,8 @@ struct PlateCalculatorView: View {
                             Text(plate.clean)
                                 .font(.headline.monospacedDigit())
                                 .frame(width: 52, height: 52)
-                                .background(Color.indigo.opacity(0.15), in: Circle())
-                                .foregroundStyle(.indigo)
+                                .background(Color.brand.opacity(0.15), in: Circle())
+                                .foregroundStyle(Color.brand)
                         }
                     }
                     LabeledContent("Chargé de chaque côté",
@@ -270,7 +270,7 @@ struct WorkoutToolsView: View {
                 Section {
                     VStack(spacing: 14) {
                         Image(systemName: "wrench.and.screwdriver.fill")
-                            .font(.system(size: 40)).foregroundStyle(.indigo)
+                            .font(.system(size: 40)).foregroundStyle(Color.brand)
                         Text("Outils Premium")
                             .font(.title3.weight(.semibold))
                         Text("Calcul des disques et export CSV de tes données.")
@@ -282,7 +282,7 @@ struct WorkoutToolsView: View {
                             Label("Débloquer avec Premium", systemImage: "crown.fill")
                                 .frame(maxWidth: .infinity).padding(.vertical, 10)
                         }
-                        .buttonStyle(.borderedProminent).tint(.indigo)
+                        .buttonStyle(.borderedProminent).tint(Color.brand)
                     }
                     .padding(.vertical, 8)
                 }
@@ -339,5 +339,17 @@ enum AccentTheme: String, CaseIterable, Identifiable {
         case .pink: "Rose"
         case .red: "Rouge"
         }
+    }
+}
+
+extension Color {
+    /// Couleur d'accent de toute l'app : le thème choisi par l'utilisateur
+    /// (Premium), sinon indigo. Remplace les usages « de marque » codés en dur
+    /// pour que le choix d'accent repeigne l'ensemble de l'interface.
+    @MainActor static var brand: Color {
+        guard PremiumStore.shared.isPremium,
+              let raw = UserDefaults.standard.string(forKey: "accentTheme"),
+              let theme = AccentTheme(rawValue: raw) else { return .indigo }
+        return theme.color
     }
 }

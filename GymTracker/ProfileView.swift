@@ -76,7 +76,7 @@ struct OnboardingView: View {
                             .foregroundStyle(.white)
                             .frame(width: 92, height: 92)
                             .background(
-                                LinearGradient(colors: [.indigo, .purple],
+                                LinearGradient(colors: [Color.brand, .purple],
                                                startPoint: .topLeading, endPoint: .bottomTrailing),
                                 in: RoundedRectangle(cornerRadius: 24, style: .continuous)
                             )
@@ -117,7 +117,7 @@ struct OnboardingView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.indigo)
+                    .tint(Color.brand)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                 } footer: {
@@ -220,7 +220,7 @@ struct ProfileView: View {
                                     Text(day.short)
                                         .font(.footnote.weight(.semibold))
                                         .frame(width: 34, height: 34)
-                                        .background(on ? Color.indigo : Color(.tertiarySystemFill),
+                                        .background(on ? Color.brand : Color(.tertiarySystemFill),
                                                     in: Circle())
                                         .foregroundStyle(on ? .white : .primary)
                                 }

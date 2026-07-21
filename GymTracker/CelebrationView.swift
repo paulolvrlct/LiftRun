@@ -20,7 +20,7 @@ struct ConfettiView: View {
     @State private var startDate = Date.now
 
     private let particles: [Particle] = {
-        let palette: [Color] = [.indigo, .purple, .green, .orange, .teal, .pink, .yellow]
+        let palette: [Color] = [Color.brand, .purple, .green, .orange, .teal, .pink, .yellow]
         return (0..<70).map { _ in
             Particle(
                 x: .random(in: 0.02...0.98),
@@ -258,7 +258,7 @@ struct WorkoutCelebrationView: View {
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.indigo)
+                .tint(Color.brand)
             }
             .padding(26)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))

@@ -95,7 +95,7 @@ struct HistoryView: View {
                     .fontWeight(isToday ? .bold : .regular)
                 HStack(spacing: 3) {
                     if hasSession {
-                        Circle().fill(Color.indigo).frame(width: 5, height: 5)
+                        Circle().fill(Color.brand).frame(width: 5, height: 5)
                     }
                     if hasRun {
                         Circle().fill(Color.green).frame(width: 5, height: 5)
@@ -111,12 +111,12 @@ struct HistoryView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 38)
             .background(
-                isSelected ? Color.indigo.opacity(0.18)
+                isSelected ? Color.brand.opacity(0.18)
                 : isToday ? Color(.tertiarySystemFill)
                 : .clear,
                 in: RoundedRectangle(cornerRadius: 10)
             )
-            .foregroundStyle(isSelected ? .indigo : .primary)
+            .foregroundStyle(isSelected ? Color.brand : .primary)
         }
         .buttonStyle(.plain)
     }
@@ -342,7 +342,7 @@ private struct SessionRow: View {
         HStack(spacing: 12) {
             Image(systemName: "checkmark.seal.fill")
                 .font(.title3)
-                .foregroundStyle(.indigo)
+                .foregroundStyle(Color.brand)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(session.templateName).font(.subheadline.weight(.semibold))

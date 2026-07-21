@@ -122,7 +122,7 @@ struct HomeView: View {
 
     private var backgroundGradient: some View {
         LinearGradient(
-            colors: [Color(.systemGroupedBackground), Color.indigo.opacity(0.12), Color(.systemGroupedBackground)],
+            colors: [Color(.systemGroupedBackground), Color.brand.opacity(0.12), Color(.systemGroupedBackground)],
             startPoint: .top, endPoint: .bottom
         )
         .ignoresSafeArea()
@@ -153,7 +153,7 @@ struct HomeView: View {
                           value: "\(sessionsThisWeek)", label: "séances cette semaine",
                           pulse: sessionsThisWeek > 0)
                 .statEntrance(statsAppeared, index: 0)
-            GlassStatCard(icon: "bolt.fill", tint: .indigo,
+            GlassStatCard(icon: "bolt.fill", tint: Color.brand,
                           value: "\(streak)", label: "jours de streak",
                           pulse: streak > 0)
                 .statEntrance(statsAppeared, index: 1)
@@ -188,7 +188,7 @@ struct HomeView: View {
                             .font(.title3)
                             .foregroundStyle(.white)
                             .frame(width: 46, height: 46)
-                            .background(LinearGradient(colors: [.indigo, .purple],
+                            .background(LinearGradient(colors: [Color.brand, .purple],
                                                        startPoint: .topLeading, endPoint: .bottomTrailing),
                                         in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                         VStack(alignment: .leading, spacing: 2) {
@@ -198,7 +198,7 @@ struct HomeView: View {
                         Spacer()
                         Image(systemName: "play.circle.fill")
                             .font(.title2)
-                            .foregroundStyle(.indigo)
+                            .foregroundStyle(Color.brand)
                     }
                     .padding(14)
                     .glassCard()

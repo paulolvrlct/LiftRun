@@ -91,7 +91,7 @@ private struct TemplateCard: View {
                     .foregroundStyle(.white)
                     .frame(width: 46, height: 46)
                     .background(
-                        LinearGradient(colors: [.indigo, .purple],
+                        LinearGradient(colors: [Color.brand, .purple],
                                        startPoint: .topLeading, endPoint: .bottomTrailing),
                         in: RoundedRectangle(cornerRadius: 12, style: .continuous)
                     )
@@ -134,7 +134,7 @@ private struct TemplateCard: View {
                     .padding(.vertical, 10)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.indigo)
+            .tint(Color.brand)
         }
         .padding(16)
         .background(.background, in: RoundedRectangle(cornerRadius: 20, style: .continuous))

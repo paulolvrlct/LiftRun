@@ -106,7 +106,7 @@ struct NutritionView: View {
                     .padding(.vertical, 12)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.indigo)
+            .tint(Color.brand)
         }
         .padding(20)
         .background(.background, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -163,8 +163,8 @@ struct NutritionView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Color.indigo.opacity(0.12), in: Capsule())
-                .foregroundStyle(.indigo)
+                .background(Color.brand.opacity(0.12), in: Capsule())
+                .foregroundStyle(Color.brand)
             }
 
             VStack(spacing: 10) {
@@ -234,7 +234,7 @@ struct NutritionView: View {
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.bordered)
-                .tint(.indigo)
+                .tint(Color.brand)
             } else {
                 ForEach(MealKind.allCases) { meal in
                     let entries = dayEntries.filter { $0.meal == meal.rawValue }
@@ -251,7 +251,7 @@ struct NutritionView: View {
                         .padding(.vertical, 10)
                 }
                 .buttonStyle(.bordered)
-                .tint(.indigo)
+                .tint(Color.brand)
             }
         }
     }
@@ -329,7 +329,7 @@ struct CalorieRing: View {
                 .trim(from: 0, to: progress)
                 .stroke(
                     over ? AnyShapeStyle(Color.orange)
-                         : AnyShapeStyle(AngularGradient(colors: [.indigo, .purple, .indigo],
+                         : AnyShapeStyle(AngularGradient(colors: [Color.brand, .purple, Color.brand],
                                                          center: .center)),
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
@@ -430,7 +430,7 @@ struct AddFoodView: View {
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 7)
-                                .background(isOn ? Color.indigo : Color(.tertiarySystemFill),
+                                .background(isOn ? Color.brand : Color(.tertiarySystemFill),
                                             in: Capsule())
                                 .foregroundStyle(isOn ? .white : .primary)
                             }
@@ -589,7 +589,7 @@ struct FoodQuantityView: View {
                                         .font(.footnote.weight(.medium))
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 7)
-                                        .background(isOn ? Color.indigo : Color(.tertiarySystemFill),
+                                        .background(isOn ? Color.brand : Color(.tertiarySystemFill),
                                                     in: Capsule())
                                         .foregroundStyle(isOn ? .white : .primary)
                                 }
@@ -620,7 +620,7 @@ struct FoodQuantityView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.indigo)
+                    .tint(Color.brand)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                 }

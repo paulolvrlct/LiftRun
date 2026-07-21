@@ -95,7 +95,7 @@ struct ExerciseLibraryView: View {
                 .font(.footnote.weight(.medium))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(isOn ? Color.indigo : Color(.tertiarySystemFill), in: Capsule())
+                .background(isOn ? Color.brand : Color(.tertiarySystemFill), in: Capsule())
                 .foregroundStyle(isOn ? .white : .primary)
         }
         .buttonStyle(.plain)
@@ -154,7 +154,7 @@ struct ExerciseDetailView: View {
 
                 // Badges
                 HStack(spacing: 8) {
-                    badge(exercise.categoryFR, icon: "figure.arms.open", color: .indigo)
+                    badge(exercise.categoryFR, icon: "figure.arms.open", color: Color.brand)
                     badge(exercise.equipmentFR, icon: "dumbbell.fill", color: .purple)
                 }
 
@@ -205,8 +205,8 @@ struct ExerciseDetailView: View {
                                 Text("\(i + 1)")
                                     .font(.caption.weight(.bold))
                                     .frame(width: 22, height: 22)
-                                    .background(Color.indigo.opacity(0.15), in: Circle())
-                                    .foregroundStyle(.indigo)
+                                    .background(Color.brand.opacity(0.15), in: Circle())
+                                    .foregroundStyle(Color.brand)
                                 Text(step)
                                     .font(.subheadline)
                             }
@@ -233,7 +233,7 @@ struct ExerciseDetailView: View {
                         .padding(.vertical, 12)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.indigo)
+                .tint(Color.brand)
                 .padding()
                 .background(.regularMaterial)
             }
