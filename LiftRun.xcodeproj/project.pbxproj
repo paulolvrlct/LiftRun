@@ -176,7 +176,7 @@
 					};
 				};
 			};
-			buildConfigurationList = GT00000000000000000000AB /* Build configuration list for PBXProject "GymTracker" */;
+			buildConfigurationList = GT00000000000000000000AB /* Build configuration list for PBXProject "LiftRun" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = fr;
 			hasScannedForEncodings = 0;
@@ -478,7 +478,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		GT00000000000000000000AB /* Build configuration list for PBXProject "GymTracker" */ = {
+		GT00000000000000000000AB /* Build configuration list for PBXProject "LiftRun" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				GT00000000000000000000B1 /* Debug */,

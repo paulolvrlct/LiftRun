@@ -17,7 +17,7 @@
                BlueprintIdentifier = "GT00000000000000000000A6"
                BuildableName = "GymTracker.app"
                BlueprintName = "GymTracker"
-               ReferencedContainer = "container:GymTracker.xcodeproj">
+               ReferencedContainer = "container:LiftRun.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -39,9 +39,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <StoreKitConfigurationFileReference
-         identifier = "../../GymTracker/Products.storekit">
-      </StoreKitConfigurationFileReference>
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
@@ -49,9 +46,12 @@
             BlueprintIdentifier = "GT00000000000000000000A6"
             BuildableName = "GymTracker.app"
             BlueprintName = "GymTracker"
-            ReferencedContainer = "container:GymTracker.xcodeproj">
+            ReferencedContainer = "container:LiftRun.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../GymTracker/Products.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -66,7 +66,7 @@
             BlueprintIdentifier = "GT00000000000000000000A6"
             BuildableName = "GymTracker.app"
             BlueprintName = "GymTracker"
-            ReferencedContainer = "container:GymTracker.xcodeproj">
+            ReferencedContainer = "container:LiftRun.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
