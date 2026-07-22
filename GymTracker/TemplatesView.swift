@@ -13,23 +13,38 @@ struct TemplatesView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: 14) {
-                    ForEach(templates) { template in
-                        TemplateCard(template: template) {
-                            activeTemplate = template
-                        }
-                        .contextMenu {
-                            Button {
-                                duplicate(template)
-                            } label: {
-                                Label("Dupliquer", systemImage: "plus.square.on.square")
-                            }
+            List {
+                ForEach(templates) { template in
+                    TemplateCard(template: template) {
+                        activeTemplate = template
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 7, leading: 16, bottom: 7, trailing: 16))
+                    .contextMenu {
+                        Button {
+                            duplicate(template)
+                        } label: {
+                            Label("Dupliquer", systemImage: "plus.square.on.square")
                         }
                     }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            delete(template)
+                        } label: {
+                            Label("Supprimer", systemImage: "trash")
+                        }
+                        Button {
+                            duplicate(template)
+                        } label: {
+                            Label("Dupliquer", systemImage: "plus.square.on.square")
+                        }
+                        .tint(Color.brand)
+                    }
                 }
-                .padding()
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Séances")
             .toolbar {
@@ -42,10 +57,11 @@ struct TemplatesView: View {
                         }
                         let t = WorkoutTemplate(name: "Nouvelle séance", order: templates.count)
                         context.insert(t)
-                        try? context.save()
+                        context.saveLogging()
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Nouvelle séance")
                 }
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
@@ -72,8 +88,14 @@ struct TemplatesView: View {
             newEx.workout = copy
             context.insert(newEx)
         }
-        try? context.save()
+        context.saveLogging()
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
+
+    private func delete(_ template: WorkoutTemplate) {
+        context.delete(template)
+        context.saveLogging()
+        UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
     }
 }
 
@@ -173,13 +195,13 @@ struct TemplateEditorView: View {
                 .onDelete { offsets in
                     let sorted = template.sortedExercises
                     for i in offsets { context.delete(sorted[i]) }
-                    try? context.save()
+                    context.saveLogging()
                 }
                 .onMove { source, destination in
                     var sorted = template.sortedExercises
                     sorted.move(fromOffsets: source, toOffset: destination)
                     for (i, ex) in sorted.enumerated() { ex.order = i }
-                    try? context.save()
+                    context.saveLogging()
                 }
 
                 Button {
@@ -194,7 +216,7 @@ struct TemplateEditorView: View {
                                               order: template.exercises.count)
                     ex.workout = template
                     context.insert(ex)
-                    try? context.save()
+                    context.saveLogging()
                 } label: {
                     Label("Ajouter un exercice vierge", systemImage: "plus.circle.fill")
                 }
@@ -203,7 +225,7 @@ struct TemplateEditorView: View {
             Section {
                 Button("Supprimer la séance", role: .destructive) {
                     context.delete(template)
-                    try? context.save()
+                    context.saveLogging()
                     dismiss()
                 }
             }
@@ -224,7 +246,7 @@ struct TemplateEditorView: View {
                 )
                 ex.workout = template
                 context.insert(ex)
-                try? context.save()
+                context.saveLogging()
             }
         }
     }

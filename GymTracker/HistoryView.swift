@@ -106,11 +106,13 @@ struct HistoryView: View {
     private var monthHeader: some View {
         HStack {
             Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
+                .accessibilityLabel("Mois précédent")
             Spacer()
             Text(displayedMonth.formatted(.dateTime.month(.wide).year()).capitalized)
                 .font(.headline)
             Spacer()
             Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
+                .accessibilityLabel("Mois suivant")
         }
         .padding(.horizontal, 8)
     }
@@ -298,7 +300,7 @@ struct HistoryView: View {
                         .contextMenu {
                             Button(role: .destructive) {
                                 context.delete(session)
-                                try? context.save()
+                                context.saveLogging()
                             } label: {
                                 Label("Supprimer", systemImage: "trash")
                             }
@@ -313,7 +315,7 @@ struct HistoryView: View {
                         .contextMenu {
                             Button(role: .destructive) {
                                 context.delete(run)
-                                try? context.save()
+                                context.saveLogging()
                             } label: {
                                 Label("Supprimer", systemImage: "trash")
                             }

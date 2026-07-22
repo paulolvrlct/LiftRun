@@ -148,6 +148,23 @@ struct ProfileView: View {
     // Thème (Premium)
     @AppStorage("accentTheme") private var accentRaw = AccentTheme.indigo.rawValue
     @State private var showPaywall = false
+    @State private var importingWeight = false
+    @State private var healthImportMessage: String?
+
+    private func importWeightFromHealth() {
+        importingWeight = true
+        healthImportMessage = nil
+        Task {
+            let kg = await HealthKitManager.shared.latestBodyMassKg()
+            importingWeight = false
+            if let kg, kg > 0 {
+                weightKg = (kg * 2).rounded() / 2   // arrondi au demi-kilo
+                healthImportMessage = "Poids mis à jour depuis Santé."
+            } else {
+                healthImportMessage = "Aucun poids trouvé dans Santé (ou accès refusé)."
+            }
+        }
+    }
 
     private let weekdays: [(id: Int, short: String)] = [
         (2, "L"), (3, "M"), (4, "M"), (5, "J"), (6, "V"), (7, "S"), (1, "D")
@@ -198,6 +215,21 @@ struct ProfileView: View {
                             value: $weightKg, in: 30...250, step: 0.5)
                     if let bmi {
                         LabeledContent("IMC", value: String(format: "%.1f", bmi))
+                    }
+                    Button {
+                        importWeightFromHealth()
+                    } label: {
+                        HStack {
+                            Label("Importer mon poids depuis Santé", systemImage: "heart.text.square")
+                            Spacer()
+                            if importingWeight { ProgressView() }
+                        }
+                    }
+                    .disabled(importingWeight)
+                    if let healthImportMessage {
+                        Text(healthImportMessage)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
 

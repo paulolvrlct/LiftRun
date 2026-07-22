@@ -81,7 +81,7 @@ enum SeedData {
         ]
 
         [a, b, c].forEach { context.insert($0) }
-        try? context.save()
+        context.saveLogging()
     }
 
     /// "figure.pullup" n'existe pas dans SF Symbols : les séances déjà créées
@@ -93,6 +93,6 @@ enum SeedData {
             template.icon = "figure.strengthtraining.functional"
             changed = true
         }
-        if changed { try? context.save() }
+        if changed { context.saveLogging() }
     }
 }

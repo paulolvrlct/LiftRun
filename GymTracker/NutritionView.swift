@@ -71,6 +71,7 @@ struct NutritionView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Ajouter un aliment")
                 }
             }
         }
@@ -119,6 +120,7 @@ struct NutritionView: View {
     private var dayPicker: some View {
         HStack {
             Button { shiftDay(-1) } label: { Image(systemName: "chevron.left") }
+                .accessibilityLabel("Jour précédent")
             Spacer()
             Text(calendar.isDateInToday(day) ? "Aujourd'hui"
                  : calendar.isDateInYesterday(day) ? "Hier"
@@ -127,6 +129,7 @@ struct NutritionView: View {
             Spacer()
             Button { shiftDay(1) } label: { Image(systemName: "chevron.right") }
                 .disabled(calendar.isDateInToday(day))
+                .accessibilityLabel("Jour suivant")
         }
         .padding(.horizontal, 8)
     }
@@ -289,7 +292,7 @@ struct NutritionView: View {
                             Task { await HealthKitManager.shared.deleteFoodSamples(ids: ids) }
                         }
                         context.delete(entry)
-                        try? context.save()
+                        context.saveLogging()
                         NutritionPlanner.publishForWidget(context: context)
                     } label: {
                         Label("Supprimer", systemImage: "trash")
@@ -510,6 +513,7 @@ struct FoodQuantityView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var grams: Double = 100
+    @FocusState private var gramsFocused: Bool
     // présélection du repas selon l'heure (petit-déj / déjeuner / goûter / dîner)
     @State private var mealRaw = MealKind.current.rawValue
 
@@ -599,8 +603,22 @@ struct FoodQuantityView: View {
                         }
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
-                    Stepper("\(Int(grams)) \(unit)", value: $grams, in: 5...1500, step: 5)
-                    Slider(value: $grams, in: 5...500, step: 5)
+                    // saisie directe au clavier + pas à pas, sur la même plage que le slider
+                    HStack {
+                        Text("Quantité")
+                        Spacer()
+                        TextField("100", value: $grams, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 70)
+                            .focused($gramsFocused)
+                            .accessibilityLabel("Quantité en \(unit)")
+                        Text(unit).foregroundStyle(.secondary)
+                    }
+                    Stepper("Ajuster", value: $grams, in: 5...2000, step: 5)
+                        .labelsHidden()
+                    Slider(value: $grams, in: 5...2000, step: 5)
+                        .accessibilityLabel("Quantité")
                     LabeledContent("Apport", value: "\(kcal) kcal")
                 }
                 Section("Repas") {
@@ -632,6 +650,10 @@ struct FoodQuantityView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Annuler") { dismiss() }
                 }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("OK") { gramsFocused = false }
+                }
             }
         }
     }
@@ -645,7 +667,7 @@ struct FoodQuantityView: View {
                               carbsPer100: food.c, fatPer100: food.f,
                               meal: mealRaw, category: food.g)
         context.insert(entry)
-        try? context.save()
+        context.saveLogging()
         NutritionPlanner.publishForWidget(context: context)
 
         // Écrit aussi dans Apple Santé et mémorise les UUID pour la suppression
@@ -656,7 +678,7 @@ struct FoodQuantityView: View {
                 date: entry.date, name: entry.name)
             if !ids.isEmpty {
                 entry.healthIDs = ids.joined(separator: ",")
-                try? context.save()
+                context.saveLogging()
             }
         }
 

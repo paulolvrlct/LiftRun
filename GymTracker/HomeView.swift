@@ -67,7 +67,7 @@ struct HomeView: View {
                     }
                     .buttonStyle(.plain)
                     quickStartSection
-                    if let last = sessions.first { recentActivity(last) }
+                    recentActivitySection
                     footerSignature
                 }
                 .padding()
@@ -82,6 +82,7 @@ struct HomeView: View {
                     } label: {
                         Image(systemName: "person.crop.circle")
                     }
+                    .accessibilityLabel("Mon profil")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -89,6 +90,7 @@ struct HomeView: View {
                     } label: {
                         Image(systemName: "books.vertical.fill")
                     }
+                    .accessibilityLabel("Bibliothèque d'exercices")
                 }
             }
             .sheet(isPresented: $showLibrary) {
@@ -134,8 +136,10 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(profileName.isEmpty ? greeting + " 👋" : "\(greeting), \(profileName) 👋")
                 .font(.largeTitle.weight(.bold))
+            // le nombre de jours est déjà mis en avant dans la carte « streak » :
+            // ici on garde un message d'encouragement sans répéter le chiffre
             Text(streak > 0
-                 ? "\(streak) jour\(streak > 1 ? "s" : "") d'affilée, continue comme ça 🔥"
+                 ? "Belle régularité, garde le rythme 🔥"
                  : "Prêt à t'y remettre aujourd'hui ?")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -179,6 +183,23 @@ struct HomeView: View {
                 .font(.headline)
                 .padding(.leading, 4)
 
+            if templates.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "dumbbell")
+                        .font(.title)
+                        .foregroundStyle(Color.brand)
+                    Text("Aucune séance type pour l'instant")
+                        .font(.subheadline.weight(.medium))
+                    Text("Crée ta première séance dans l'onglet Séances pour la lancer d'ici en un tap.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(20)
+                .glassCard()
+            }
+
             ForEach(templates) { template in
                 Button {
                     activeTemplate = template
@@ -208,23 +229,42 @@ struct HomeView: View {
         }
     }
 
-    // MARK: Dernière activité
+    // MARK: Dernière activité (séance ou course, la plus récente)
 
-    private func recentActivity(_ session: WorkoutSession) -> some View {
+    @ViewBuilder
+    private var recentActivitySection: some View {
+        let lastSession = sessions.first
+        let lastRun = runs.first
+        // on prend la plus récente des deux, tous types confondus
+        let sessionIsNewer = (lastSession?.date ?? .distantPast) >= (lastRun?.date ?? .distantPast)
+
+        if let session = lastSession, sessionIsNewer {
+            recentCard(title: "Dernière activité", icon: "checkmark.seal.fill", tint: .green,
+                       name: session.templateName, date: session.date,
+                       trailing: "\(session.sets.count) séries")
+        } else if let run = lastRun {
+            recentCard(title: "Dernière activité", icon: "figure.run", tint: .green,
+                       name: String(format: "Course · %.2f km", run.distanceKm), date: run.date,
+                       trailing: PaceFormatter.duration(run.durationSeconds))
+        }
+    }
+
+    private func recentCard(title: String, icon: String, tint: Color,
+                            name: String, date: Date, trailing: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Dernière séance")
+            Text(title)
                 .font(.headline)
                 .padding(.leading, 4)
             HStack(spacing: 14) {
-                Image(systemName: "checkmark.seal.fill")
-                    .font(.title2).foregroundStyle(.green)
+                Image(systemName: icon)
+                    .font(.title2).foregroundStyle(tint)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(session.templateName).font(.subheadline.weight(.semibold))
-                    Text(session.date.formatted(.relative(presentation: .named)))
+                    Text(name).font(.subheadline.weight(.semibold))
+                    Text(date.formatted(.relative(presentation: .named)))
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text("\(session.sets.count) séries")
+                Text(trailing)
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
             }
@@ -250,8 +290,11 @@ private struct GlassStatCard: View {
                 .foregroundStyle(tint)
                 .symbolEffect(.pulse, options: .repeating, isActive: pulse)
             Text(value)
-                .font(.system(size: 28, weight: .bold, design: .rounded).monospacedDigit())
+                // taille relative → suit les réglages d'accessibilité (Dynamic Type)
+                .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
                 .contentTransition(.numericText())
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)

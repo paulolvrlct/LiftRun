@@ -25,6 +25,7 @@ struct ActiveWorkoutView: View {
     @State private var loggedSets: [DraftSet] = []
     @State private var startDate = Date.now
     @State private var showCancelAlert = false
+    @State private var showSaveError = false
     @State private var showCelebration = false
     @State private var prFlash: PRResult?
     @State private var sessionPRs: [PRResult] = []
@@ -138,6 +139,12 @@ struct ActiveWorkoutView: View {
             } message: {
                 Text("Les séries saisies ne seront pas enregistrées.")
             }
+            .alert("Enregistrement impossible", isPresented: $showSaveError) {
+                Button("Réessayer") { finishWorkout() }
+                Button("Fermer", role: .cancel) {}
+            } message: {
+                Text("Ta séance n'a pas pu être sauvegardée. Vérifie l'espace de stockage puis réessaie.")
+            }
         }
     }
 
@@ -176,7 +183,11 @@ struct ActiveWorkoutView: View {
             record.session = session
             context.insert(record)
         }
-        try? context.save()
+        // si l'enregistrement échoue, on prévient au lieu de fêter une séance perdue
+        guard context.saveLogging() else {
+            showSaveError = true
+            return
+        }
         restTimer.stop()   // coupe chrono de repos, Live Activity et notification
 
         // Enregistre l'entraînement dans Apple Santé
@@ -205,6 +216,9 @@ private struct ExerciseLogCard: View {
     @State private var weight: Double
     @State private var showNotes = false
     @State private var showAnimation = false
+    @FocusState private var focus: Field?
+
+    private enum Field { case reps, weight }
 
     init(exercise: ExerciseTemplate, sets: [DraftSet],
          last: (reps: Int, weight: Double)?, onLog: @escaping (Int, Double) -> Void) {
@@ -252,6 +266,7 @@ private struct ExerciseLogCard: View {
                         Image(systemName: "book.fill")
                             .foregroundStyle(Color.brand)
                     }
+                    .accessibilityLabel("Voir l'exécution de l'exercice")
                 }
                 if !exercise.notes.isEmpty {
                     Button {
@@ -260,6 +275,7 @@ private struct ExerciseLogCard: View {
                         Image(systemName: "info.circle")
                             .foregroundStyle(.secondary)
                     }
+                    .accessibilityLabel("Afficher les notes")
                 }
             }
 
@@ -286,16 +302,22 @@ private struct ExerciseLogCard: View {
                 }
             }
 
-            // Saisie
+            // Saisie — les valeurs centrales sont tappables pour saisie clavier
             HStack(spacing: 10) {
                 VStack(spacing: 2) {
                     Text("REPS").font(.caption2).foregroundStyle(.secondary)
                     HStack(spacing: 0) {
                         stepButton("minus") { if reps > 1 { reps -= 1 } }
-                        Text("\(reps)")
+                            .accessibilityLabel("Une répétition de moins")
+                        TextField("", value: $reps, format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
                             .font(.title3.monospacedDigit().weight(.semibold))
-                            .frame(minWidth: 40)
+                            .frame(minWidth: 44)
+                            .focused($focus, equals: .reps)
+                            .accessibilityLabel("Répétitions")
                         stepButton("plus") { reps += 1 }
+                            .accessibilityLabel("Une répétition de plus")
                     }
                 }
 
@@ -303,17 +325,24 @@ private struct ExerciseLogCard: View {
                     Text("POIDS (KG)").font(.caption2).foregroundStyle(.secondary)
                     HStack(spacing: 0) {
                         stepButton("minus") { if weight >= 1.25 { weight -= 1.25 } }
-                        Text(weight.clean)
+                            .accessibilityLabel("Moins 1,25 kilo")
+                        TextField("", value: $weight, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.center)
                             .font(.title3.monospacedDigit().weight(.semibold))
-                            .frame(minWidth: 52)
+                            .frame(minWidth: 56)
+                            .focused($focus, equals: .weight)
+                            .accessibilityLabel("Poids en kilos")
                         stepButton("plus") { weight += 1.25 }
+                            .accessibilityLabel("Plus 1,25 kilo")
                     }
                 }
 
                 Spacer()
 
                 Button {
-                    onLog(reps, weight)
+                    focus = nil
+                    onLog(max(reps, 0), max(weight, 0))
                 } label: {
                     Image(systemName: "checkmark")
                         .font(.headline)
@@ -322,11 +351,18 @@ private struct ExerciseLogCard: View {
                 .buttonStyle(.borderedProminent)
                 .tint(isDone ? .green : Color.brand)
                 .clipShape(Circle())
+                .accessibilityLabel("Valider la série")
             }
         }
         .padding(16)
         .background(.background, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .shadow(color: .black.opacity(0.06), radius: 8, y: 3)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("OK") { focus = nil }
+            }
+        }
         .sheet(isPresented: $showAnimation) {
             if let catalogEx {
                 NavigationStack {
@@ -377,7 +413,10 @@ final class RestTimerModel: ObservableObject {
         endDate = Date.now.addingTimeInterval(TimeInterval(seconds))
         isRunning = true
 
-        // Dynamic Island + écran verrouillé + notification de fin
+        // Dynamic Island + écran verrouillé + notification de fin.
+        // La permission notifications est demandée ici, au moment utile (1er repos),
+        // plutôt qu'en bloc au lancement de l'app.
+        NotificationManager.shared.requestAuthorization()
         LiveActivityManager.shared.startRest(exerciseName: exerciseName, workoutName: workoutName, seconds: seconds)
         NotificationManager.shared.scheduleRestEnd(after: seconds, exerciseName: exerciseName)
 
@@ -462,6 +501,7 @@ private struct RestTimerBar: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(Color.brand)
+            .accessibilityLabel("Passer le repos")
         }
         .padding(14)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))

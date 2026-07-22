@@ -6,6 +6,8 @@
 	<false/>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>LiftRun enregistre tes séances, tes courses et ta nutrition dans Apple Santé.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>LiftRun lit ton poids depuis Apple Santé pour pré-remplir ton profil, uniquement quand tu le demandes.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

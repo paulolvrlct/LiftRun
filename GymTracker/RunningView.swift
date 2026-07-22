@@ -40,7 +40,7 @@ struct RunningView: View {
                                              durationSeconds: result.duration,
                                              routeEncoded: result.route)
                         context.insert(run)
-                        try? context.save()
+                        context.saveLogging()
 
                         // Enregistre la course dans Apple Santé
                         let weight = UserDefaults.standard.double(forKey: "profileWeightKg")
@@ -204,7 +204,7 @@ struct RunningView: View {
                 .buttonStyle(.plain)
                 .contextMenu {
                     Button(role: .destructive) {
-                        context.delete(run); try? context.save()
+                        context.delete(run); context.saveLogging()
                     } label: { Label("Supprimer", systemImage: "trash") }
                 }
             }

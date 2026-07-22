@@ -136,6 +136,7 @@ struct SupplementsView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showPicker = true } label: { Image(systemName: "plus") }
+                    .accessibilityLabel("Ajouter un complément")
             }
         }
         .sheet(isPresented: $showPicker) { SupplementPickerView() }
@@ -144,6 +145,7 @@ struct SupplementsView: View {
     private var dayPicker: some View {
         HStack {
             Button { shiftDay(-1) } label: { Image(systemName: "chevron.left") }
+                .accessibilityLabel("Jour précédent")
             Spacer()
             Text(calendar.isDateInToday(day) ? "Aujourd'hui"
                  : calendar.isDateInYesterday(day) ? "Hier"
@@ -152,6 +154,7 @@ struct SupplementsView: View {
             Spacer()
             Button { shiftDay(1) } label: { Image(systemName: "chevron.right") }
                 .disabled(calendar.isDateInToday(day))
+                .accessibilityLabel("Jour suivant")
         }
         .padding(.horizontal, 8)
     }
@@ -163,8 +166,10 @@ struct SupplementsView: View {
     private var headerCard: some View {
         VStack(spacing: 10) {
             Text("\(takenCount) / \(dailyActive.count)")
-                .font(.system(size: 40, weight: .bold, design: .rounded).monospacedDigit())
+                .font(.system(.largeTitle, design: .rounded).weight(.bold).monospacedDigit())
                 .contentTransition(.numericText())
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
             Text(!dailyActive.isEmpty && takenCount == dailyActive.count
                  ? "Routine complète 💪" : "quotidiens pris")
                 .font(.subheadline)
@@ -224,14 +229,14 @@ struct SupplementsView: View {
                 .contextMenu {
                     Button {
                         supplement.isDaily.toggle()
-                        try? context.save()
+                        context.saveLogging()
                     } label: {
                         Label(supplement.isDaily ? "Marquer comme optionnel" : "Marquer comme quotidien",
                               systemImage: supplement.isDaily ? "calendar.badge.minus" : "calendar.badge.checkmark")
                     }
                     Button(role: .destructive) {
                         context.delete(supplement)
-                        try? context.save()
+                        context.saveLogging()
                     } label: {
                         Label("Retirer de ma routine", systemImage: "trash")
                     }
@@ -286,7 +291,7 @@ struct SupplementsView: View {
             context.insert(SupplementIntake(date: day, supplementName: supplement.name))
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
-        try? context.save()
+        context.saveLogging()
     }
 }
 
@@ -387,7 +392,7 @@ struct SupplementPickerView: View {
         guard !existingNames.contains(name.lowercased()) else { return }
         context.insert(Supplement(name: name, emoji: emoji, dose: dose,
                                   order: supplements.count, isDaily: isDaily))
-        try? context.save()
+        context.saveLogging()
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 }

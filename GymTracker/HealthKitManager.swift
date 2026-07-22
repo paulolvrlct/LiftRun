@@ -82,6 +82,26 @@ final class HealthKitManager {
         }
     }
 
+    // MARK: Lecture du poids (opt-in)
+
+    /// Lit le poids le plus récent enregistré dans Apple Santé (kg), si disponible
+    /// et autorisé. Sert à pré-remplir le profil sans ressaisie.
+    func latestBodyMassKg() async -> Double? {
+        guard isAvailable else { return nil }
+        let type = HKQuantityType(.bodyMass)
+        try? await store.requestAuthorization(toShare: [], read: [type])
+        return await withCheckedContinuation { continuation in
+            let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+            let query = HKSampleQuery(sampleType: type, predicate: nil, limit: 1,
+                                      sortDescriptors: [sort]) { _, results, _ in
+                let kg = (results?.first as? HKQuantitySample)?
+                    .quantity.doubleValue(for: .gramUnit(with: .kilo))
+                continuation.resume(returning: kg)
+            }
+            store.execute(query)
+        }
+    }
+
     // MARK: Rattrapage de l'historique
 
     /// Exporte une seule fois l'historique existant (séances + courses) vers

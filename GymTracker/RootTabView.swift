@@ -44,10 +44,13 @@ struct RootTabView: View {
             OnboardingView()
         }
         .onAppear {
-            NotificationManager.shared.requestAuthorization()
             NutritionPlanner.publishForWidget(context: context)
-            // Exporte une fois l'historique pré-HealthKit vers Apple Santé
-            Task { await HealthKitManager.shared.backfillIfNeeded(context: context) }
+            // Les permissions ne sont plus demandées en bloc au lancement :
+            // - notifications → au 1er repos chronométré (RestTimerModel) et via le toggle Rappels
+            // - Santé → une fois l'onboarding passé, pour l'export de l'historique
+            if hasCompletedOnboarding {
+                Task { await HealthKitManager.shared.backfillIfNeeded(context: context) }
+            }
         }
         // Lien profond depuis le widget raccourci (gymtracker://run)
         .onOpenURL { url in

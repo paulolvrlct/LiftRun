@@ -1,5 +1,24 @@
 import Foundation
 import SwiftData
+import os
+
+// MARK: - Sauvegarde SwiftData avec remontée d'erreur
+
+extension ModelContext {
+    /// Sauvegarde en journalisant l'échec (au lieu de l'avaler avec `try?`).
+    /// Retourne `false` si l'enregistrement a échoué.
+    @discardableResult
+    func saveLogging(_ context: String = #function) -> Bool {
+        do {
+            try save()
+            return true
+        } catch {
+            Logger(subsystem: "fr.devshield.gymtracker", category: "persistence")
+                .error("Échec d'enregistrement (\(context, privacy: .public)) : \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+    }
+}
 
 // MARK: - Séance type (template)
 
