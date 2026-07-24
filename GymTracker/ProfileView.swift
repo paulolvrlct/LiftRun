@@ -38,6 +38,14 @@ struct CreditsView: View {
                     .font(.footnote)
             }
 
+            Section("Produits scannés") {
+                Text("Valeurs nutritionnelles des produits emballés issues d'Open Food Facts, sous licence ODbL. Le code-barres scanné est envoyé à Open Food Facts uniquement pour retrouver le produit.")
+                    .font(.footnote)
+                Link("openfoodfacts.org",
+                     destination: URL(string: "https://world.openfoodfacts.org")!)
+                    .font(.footnote)
+            }
+
             Section("Circuits de course") {
                 Text("Tracés générés à partir des données © les contributeurs OpenStreetMap, disponibles sous licence ODbL.")
                     .font(.footnote)

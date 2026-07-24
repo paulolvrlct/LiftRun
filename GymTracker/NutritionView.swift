@@ -376,6 +376,11 @@ struct AddFoodView: View {
     @State private var query = ""
     @State private var selectedCategory: FoodCategory?
     @State private var selected: CiqualFood?
+    @State private var showScanner = false
+    // produit scanné, appliqué à la fermeture de la feuille de scan
+    @State private var scannedProduct: ScannedProduct?
+    // poids net du paquet du produit sélectionné (scan uniquement)
+    @State private var selectedPackageGrams: Double?
 
     /// Derniers aliments consommés, sans doublon, du plus récent au plus ancien
     private var recents: [CiqualFood] {
@@ -456,6 +461,7 @@ struct AddFoodView: View {
                 } else {
                     List(results) { food in
                         Button {
+                            selectedPackageGrams = nil   // aliment générique : pas de paquet
                             selected = food
                         } label: {
                             HStack(spacing: 10) {
@@ -484,16 +490,34 @@ struct AddFoodView: View {
             .navigationTitle("Ajouter un aliment")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showScanner = true
+                    } label: {
+                        Image(systemName: "barcode.viewfinder")
+                    }
+                    .accessibilityLabel("Scanner un code-barres")
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Fermer") { dismiss() }
                 }
+            }
+            // la feuille de quantité s'ouvre une fois le scanner refermé
+            .sheet(isPresented: $showScanner, onDismiss: {
+                if let scannedProduct {
+                    selectedPackageGrams = scannedProduct.packageGrams
+                    selected = scannedProduct.food
+                    self.scannedProduct = nil
+                }
+            }) {
+                FoodScanSheet { product in scannedProduct = product }
             }
             .onAppear {
                 // pas d'historique : on démarre sur les aliments courants
                 if recents.isEmpty { source = .common }
             }
             .sheet(item: $selected) { food in
-                FoodQuantityView(food: food, day: day) {
+                FoodQuantityView(food: food, day: day, packageGrams: selectedPackageGrams) {
                     dismiss()
                 }
                 .presentationDetents([.medium, .large])
@@ -507,6 +531,8 @@ struct AddFoodView: View {
 struct FoodQuantityView: View {
     let food: CiqualFood
     let day: Date
+    /// Poids net du paquet (produit scanné) : active la part consommée
+    var packageGrams: Double? = nil
     var onAdded: () -> Void
 
     @Environment(\.modelContext) private var context
@@ -514,6 +540,10 @@ struct FoodQuantityView: View {
 
     @State private var grams: Double = 100
     @FocusState private var gramsFocused: Bool
+
+    /// Parts rapides proposées pour un produit emballé
+    static let portionFractions: [(label: String, value: Double)] =
+        [("¼", 0.25), ("⅓", 1.0 / 3), ("½", 0.5), ("¾", 0.75), ("Tout", 1.0)]
     // présélection du repas selon l'heure (petit-déj / déjeuner / goûter / dîner)
     @State private var mealRaw = MealKind.current.rawValue
 
@@ -578,6 +608,46 @@ struct FoodQuantityView: View {
                         Text(food.category.emoji)
                     }
                 }
+                // Produit scanné dont on connaît le poids : on raisonne en parts
+                if let pack = packageGrams, pack > 0 {
+                    Section("Part du produit") {
+                        HStack {
+                            Text("Paquet : \(Int(pack)) \(unit)")
+                                .font(.footnote).foregroundStyle(.secondary)
+                            Spacer()
+                            Text("\(Int((grams / pack * 100).rounded())) %")
+                                .font(.footnote.monospacedDigit().weight(.semibold))
+                                .foregroundStyle(Color.brand)
+                        }
+                        Slider(value: Binding(
+                            get: { min(max(grams / pack, 0), 1) },
+                            set: { grams = max(1, ($0 * pack).rounded()) }
+                        ), in: 0...1)
+                        .accessibilityLabel("Part du paquet consommée")
+
+                        HStack(spacing: 8) {
+                            ForEach(Self.portionFractions, id: \.label) { portion in
+                                let isOn = abs(grams - pack * portion.value) < 1
+                                Button {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        grams = max(1, (pack * portion.value).rounded())
+                                    }
+                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                } label: {
+                                    Text(portion.label)
+                                        .font(.footnote.weight(.medium))
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 7)
+                                        .background(isOn ? Color.brand : Color(.tertiarySystemFill),
+                                                    in: Capsule())
+                                        .foregroundStyle(isOn ? .white : .primary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
+
                 Section("Quantité") {
                     // portions en un tap (« 1 verre de coca », « 1 dose de whey »…)
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -646,6 +716,12 @@ struct FoodQuantityView: View {
             }
             .navigationTitle("Quantité")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                // petit conditionnement (yaourt, barre, canette) : on part du paquet entier
+                if let pack = packageGrams, pack > 0, pack <= 400 {
+                    grams = pack.rounded()
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Annuler") { dismiss() }

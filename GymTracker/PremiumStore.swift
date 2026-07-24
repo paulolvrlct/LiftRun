@@ -27,7 +27,7 @@ final class PremiumStore: ObservableObject {
     /// En Release (donc sur l'App Store), le paywall est toujours actif :
     /// impossible d'expédier par erreur une version où tout est offert.
     #if DEBUG
-    private let debugUnlockAll = false
+    private let debugUnlockAll = true
     #else
     private let debugUnlockAll = false
     #endif
